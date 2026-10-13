@@ -36,5 +36,5 @@ Graphs and summary table: see the results folder.
 
 Pseudocode: see PSEUDOCODE.md
 
-Intro video: (YouTube link will be added here)
+Intro video: https://youtu.be/6L8CxgFoKLY
 
