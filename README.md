@@ -412,8 +412,8 @@ Published work mostly optimises accuracy or *reduces* communication with extra m
 
 ## 🎥 Deliverables & Demos
 
-- **Introductory team orientation video:** Watch on YouTube (unlisted). **TODO: paste the link.**
-- **Interactive live working demo:** scheduled deployment on October 28 (Vercel / React dashboard). **TODO: paste the link once deployed.**
+- **Introductory team orientation video:** Watch on YouTube (unlisted). https://youtu.be/6L8CxgFoKLY
+- **Interactive live working demo:** scheduled deployment on October 28 (Vercel / React dashboard). (YET TO)
 - **Algorithmic blueprint:** see [PSEUDOCODE.md](PSEUDOCODE.md) for the core FedAvg loop.
 
 ---
