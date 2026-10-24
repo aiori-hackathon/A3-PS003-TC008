@@ -396,15 +396,20 @@ Published work mostly optimises accuracy or *reduces* communication with extra m
 
 ### References
 
-[1] H. B. McMahan, E. Moore, D. Ramage, S. Hampson, and B. A. y Arcas, "Communication-efficient learning of deep networks from decentralized data," in *Proc. 20th Int. Conf. Artif. Intell. Statist. (AISTATS)*, PMLR vol. 54, 2017. [Online]. Available: https://proceedings.mlr.press/v54/mcmahan17a.html
+[1] H. B. McMahan, E. Moore, D. Ramage, S. Hampson, and B. A. y Arcas, “Communication-Efficient Learning of Deep Networks from
+Decentralized Data,” in Proc. 20th Int. Conf. Artif. Intell. Statist. (AISTATS), PMLR, vol. 54, pp. 1273–1282, 2017.
 
-[2] Y. Liu, J. J. Q. Yu, J. Kang, D. Niyato, and S. Zhang, "Privacy-preserving traffic flow prediction: A federated learning approach," *IEEE Internet Things J.*, 2020. **TODO:** add volume, issue and page numbers from IEEE Xplore.
+[2] T. Li, A. K. Sahu, A. Talwalkar, and V. Smith, “Federated Learning: Challenges, Methods, and Future Directions,” IEEE Signal Process. Mag.,
+vol. 37, no. 3, pp. 50–60, May 2020, doi: 10.1109/MSP.2020.2975749.
 
-[3] C. Zhang, L. Cui, S. Yu, and J. J. Q. Yu, "A communication-efficient federated learning scheme for IoT-based traffic forecasting," *IEEE Internet Things J.*, vol. 9, no. 14, pp. 11918-11931, Jul. 2022. [Online]. Available: https://ieeexplore.ieee.org/document/9634121
+[3] F. Sattler, S. Wiedemann, K.-R. Müller, and W. Samek, “Robust and Communication-Efficient Federated Learning From Non-i.i.d. Data,” IEEE
+Trans. Neural Netw. Learn. Syst., vol. 31, no. 9, pp. 3400–3413, Sep. 2020, doi: 10.1109/TNNLS.2019.2944481.
 
-[4] C. Zhang, S. Zhang, S. Yu, and J. J. Q. Yu, "Graph-based traffic forecasting via communication-efficient federated learning," in *Proc. IEEE Wireless Commun. Netw. Conf. (WCNC)*, Apr. 2022, pp. 2041-2046, doi: 10.1109/WCNC51071.2022.9771883.
+[4] Y. Liu, J. J. Q. Yu, J. Kang, D. Niyato, and S. Zhang, “Privacy-Preserving Traffic Flow Prediction: A Federated Learning Approach,” IEEE
+Internet Things J., vol. 7, no. 8, pp. 7751–7763, Aug. 2020, doi: 10.1109/JIOT.2020.2991401.
 
-[5] F. Sattler, S. Wiedemann, K.-R. Müller, and W. Samek, "Robust and communication-efficient federated learning from non-i.i.d. data," *IEEE Trans. Neural Netw. Learn. Syst.*, vol. 31, no. 9, pp. 3400-3413, Sep. 2020.
+[5] fedesoriano, “Traffic Prediction Dataset,” Kaggle. [Online]. Available: https://www.kaggle.com/datasets/fedesoriano/traffic-prediction-dataset.
+Accessed: Oct. 2026.
 
 [6] **TODO:** cite the Kaggle traffic dataset (title, author, URL, access date).
 
