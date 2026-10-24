@@ -240,7 +240,7 @@ These payload sizes are computed exactly from the parameter count. They are not 
 
 | Setting | Value |
 | :--- | :--- |
-| Dataset | Public Kaggle traffic dataset, 4 junctions, hourly vehicle counts. **TODO:** add dataset name and link. |
+| Dataset | Public Kaggle traffic dataset, 4 junctions, hourly vehicle counts.https://www.kaggle.com/datasets/fedesoriano/traffic-prediction-dataset. |
 | Input / target | 12-hour window to next-hour vehicle count |
 | Model | GRU, 32 hidden units, 3,393 parameters (identical in every configuration) |
 | Train / test split | Chronological: train before May 1, 2017, test May–June 2017 ($N_{\text{test}} = 1{,}464$ hours per junction) |
@@ -411,7 +411,7 @@ Internet Things J., vol. 7, no. 8, pp. 7751–7763, Aug. 2020, doi: 10.1109/JIOT
 [5] fedesoriano, “Traffic Prediction Dataset,” Kaggle. [Online]. Available: https://www.kaggle.com/datasets/fedesoriano/traffic-prediction-dataset.
 Accessed: Oct. 2026.
 
-[6] **TODO:** cite the Kaggle traffic dataset (title, author, URL, access date).
+[6] https://www.kaggle.com/datasets/fedesoriano/traffic-prediction-dataset 
 
 ---
 
