@@ -246,7 +246,7 @@ These payload sizes are computed exactly from the parameter count. They are not 
 | Train / test split | Chronological: train before May 1, 2017, test May–June 2017 ($N_{\text{test}} = 1{,}464$ hours per junction) |
 | Federated settings | 4 clients, 1 local epoch per round, 30 rounds |
 | Seeds | 0, 1, 2 |
-| Optimiser / learning rate / batch size | src/train_central.py and src/train_fed.py |
+| Optimiser / learning rate / batch size | train_central.py and train_fed.py |
 
 ---
 
