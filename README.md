@@ -416,7 +416,7 @@ Accessed: Oct. 2026.
 ## 🎥 Deliverables & Demos
 
 - **Introductory team orientation video:** Watch on YouTube (unlisted). https://youtu.be/6L8CxgFoKLY
-- **Interactive live working demo:** scheduled deployment on October 28 (Vercel / React dashboard). (YET TO)
+- **Interactive live working demo:** https://fedtraffic-tc008.netlify.app
 - **Algorithmic blueprint:** see [PSEUDOCODE.md](PSEUDOCODE.md) for the core FedAvg loop.
 
 ---
