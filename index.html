@@ -1,0 +1,1874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FedTraffic • Privacy-Preserving Traffic Forecasting</title>
+  
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            slate: {
+              850: '#1a1e28',
+              900: '#ffffff',
+              950: '#0b0d14',
+            }
+          },
+          animation: {
+            'fadeIn': 'fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+            'pulse-subtle': 'pulseSubtle 2s infinite ease-in-out',
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0', transform: 'translateY(6px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+            pulseSubtle: {
+              '0%, 100%': { opacity: '1' },
+              '50%': { opacity: '0.75' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Chart.js for ultra-smooth high-definition charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+    
+    body {
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    
+    code, pre, .font-mono {
+      font-family: 'IBM Plex Mono', 'Consolas', monospace;
+    }
+
+    /* Custom sleek scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0b0d14;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #313744;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #434b59;
+    }
+  </style>
+  <style id="fedtraffic-control-room">
+    :root {
+      color-scheme: light;
+      --ft-bg: #e8eff1;
+      --ft-surface: #f7f9fa;
+      --ft-raised: #dfe8ec;
+      --ft-border: rgba(34, 62, 77, 0.20);
+      --ft-primary: #172b36;
+      --ft-secondary: #385260;
+      --ft-muted: #607984;
+      --ft-accent: #c7651b;
+      --ft-accent-soft: rgba(199, 101, 27, 0.12);
+      --ft-positive: #2c775c;
+    }
+
+    html { background: var(--ft-bg); scroll-behavior: smooth; }
+    body {
+      min-width: 320px;
+      background: var(--ft-bg) !important;
+      color: var(--ft-primary) !important;
+      font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+      font-size: 14px;
+    }
+    body, button, input { font-family: "IBM Plex Sans", "Segoe UI", sans-serif; }
+    code, pre, .font-mono { font-family: "IBM Plex Mono", Consolas, monospace !important; font-variant-numeric: tabular-nums; }
+    h1, h2, h3, h4 { font-weight: 500 !important; letter-spacing: 0 !important; }
+    [class*="font-extrabold"], [class*="font-bold"], [class*="font-semibold"] { font-weight: 500 !important; }
+    [class*="uppercase"], [class*="tracking-"] { text-transform: none !important; letter-spacing: 0 !important; }
+    [class*="text-slate-100"], [class*="text-slate-200"], [class*="text-white"] { color: var(--ft-primary) !important; }
+    [class*="text-slate-300"] { color: var(--ft-secondary) !important; }
+    [class*="text-slate-400"] { color: var(--ft-secondary) !important; }
+    [class*="text-slate-500"] { color: var(--ft-muted) !important; }
+    [class*="text-slate-600"] { color: var(--ft-muted) !important; }
+    [class*="text-indigo-"] { color: var(--ft-accent) !important; }
+    [class*="text-amber-"] { color: var(--ft-accent) !important; }
+    [class*="text-cyan-"] { color: var(--ft-secondary) !important; }
+    [class*="text-emerald-"] { color: var(--ft-positive) !important; }
+    [class*="bg-slate-950"] { background-color: var(--ft-bg) !important; }
+    [class*="bg-slate-900"] { background-color: var(--ft-surface) !important; }
+    [class*="bg-slate-800"] { background-color: var(--ft-raised) !important; }
+    [class*="bg-indigo-500/"], [class*="bg-indigo-600/"] { background-color: var(--ft-accent-soft) !important; }
+    [class~="bg-indigo-500"], [class~="bg-indigo-600"] { background-color: var(--ft-accent) !important; }
+    [class*="border-slate-"] { border-color: var(--ft-border) !important; }
+    [class*="border-indigo-"], [class*="border-cyan-"], [class*="border-amber-"], [class*="border-emerald-"] { border-color: var(--ft-border) !important; }
+    [class*="bg-gradient-"] { background-image: none !important; }
+    [class*="shadow-"] { box-shadow: none !important; }
+    [class*="backdrop-blur"] { backdrop-filter: none !important; }
+    [class*="animate-"] { animation: none !important; }
+    [class*="transition-all"] { transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease, opacity 160ms ease !important; }
+    [class*="rounded-full"] { border-radius: 6px !important; }
+    [class*="rounded-2xl"] { border-radius: 14px !important; }
+    [class*="rounded-xl"] { border-radius: 10px !important; }
+    [class*="rounded-lg"] { border-radius: 8px !important; }
+    [class*="rounded-md"] { border-radius: 6px !important; }
+    .text-\[10px\], .text-\[11px\] { font-size: 11px !important; line-height: 1.4 !important; }
+    .text-\[10px\] { font-size: 11px !important; }
+    input[type="range"] { accent-color: var(--ft-accent); }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    button:focus-visible, a:focus-visible, input:focus-visible {
+      outline: 2px solid var(--ft-accent) !important;
+      outline-offset: 3px;
+    }
+
+    .ft-header {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: rgba(255, 255, 255, 0.96);
+      border-bottom: 1px solid var(--ft-border);
+    }
+    .ft-header-main {
+      width: min(100%, 1520px);
+      min-height: 68px;
+      margin: 0 auto;
+      padding: 12px 32px;
+      display: grid;
+      grid-template-columns: minmax(210px, 1fr) auto auto;
+      align-items: center;
+      gap: 20px;
+    }
+    .ft-brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .ft-mark { width: 32px; height: 32px; flex: 0 0 32px; color: var(--ft-accent); }
+    .ft-brand-line { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+    .ft-brand h1 { margin: 0; font-size: 18px !important; line-height: 1 !important; color: var(--ft-primary) !important; }
+    .ft-project-id { color: var(--ft-muted); font: 11px/1.3 "IBM Plex Mono", monospace; white-space: nowrap; }
+    .ft-brand p { margin: 5px 0 0; color: var(--ft-muted) !important; font-size: 12px; }
+    .ft-desktop-nav { display: flex !important; align-items: center; gap: 3px; padding: 0 !important; background: transparent !important; border: 0 !important; }
+    .ft-desktop-nav button, .ft-mobile-nav button { min-height: 36px; padding: 8px 10px !important; border-radius: 8px !important; font-size: 12px !important; white-space: nowrap; }
+    .ft-repo-link { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; color: var(--ft-secondary) !important; border: 1px solid var(--ft-border) !important; background: var(--ft-surface) !important; border-radius: 8px !important; padding: 7px 10px !important; }
+    .ft-repo-link svg { width: 16px !important; height: 16px !important; color: var(--ft-muted) !important; }
+    .ft-mobile-nav { display: none !important; }
+    .tab-nav-btn, .mobile-nav-btn, .preset-btn, .seed-filter-btn, .junc-btn, .model-btn {
+      color: var(--ft-secondary) !important;
+      border-color: var(--ft-border) !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease !important;
+    }
+    .tab-nav-btn:hover, .mobile-nav-btn:hover, .preset-btn:hover, .seed-filter-btn:hover, .junc-btn:hover, .model-btn:hover {
+      color: var(--ft-primary) !important;
+      background: var(--ft-raised) !important;
+    }
+    .tab-nav-btn[class~="bg-indigo-600"], .mobile-nav-btn[class~="bg-indigo-600"],
+    .preset-btn[class~="bg-indigo-600"], .seed-filter-btn[class~="bg-indigo-600"] {
+      color: #211807 !important;
+      background: var(--ft-accent) !important;
+      border-color: var(--ft-accent) !important;
+    }
+    .junc-btn[class*="bg-indigo-600/20"], .model-btn[class*="bg-indigo-600/20"] {
+      color: var(--ft-accent) !important;
+      background: var(--ft-accent-soft) !important;
+      border-color: rgba(230, 173, 76, 0.55) !important;
+    }
+
+    .ft-main { width: min(100%, 1520px) !important; max-width: 1520px !important; padding: 32px !important; }
+    .ft-tab { display: grid; gap: 32px; }
+    .ft-tab > * { margin-top: 0 !important; }
+    .ft-hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr);
+      align-items: center;
+      gap: 36px;
+      padding: clamp(24px, 4vw, 52px) !important;
+      min-height: 320px;
+      background: var(--ft-surface) !important;
+      border: 1px solid var(--ft-border) !important;
+    }
+    .ft-hero-copy { position: relative; z-index: 1; max-width: 680px; }
+    .ft-hero-copy > div:first-child { display: inline-flex; align-items: center; color: var(--ft-secondary) !important; background: var(--ft-raised) !important; border: 1px solid var(--ft-border) !important; border-radius: 6px !important; }
+    .ft-hero-copy h2 { max-width: 760px; margin: 0; font-size: clamp(32px, 4vw, 52px) !important; line-height: 1.08 !important; font-weight: 500 !important; color: var(--ft-primary) !important; }
+    .ft-hero-copy p { max-width: 620px; font-size: 16px !important; line-height: 1.6 !important; color: var(--ft-secondary) !important; }
+    .ft-hero-copy button { min-height: 44px; padding: 10px 16px !important; font-size: 13px !important; border-radius: 8px !important; box-shadow: none !important; }
+    .ft-hero-copy button:first-child { color: #211807 !important; background: var(--ft-accent) !important; border: 1px solid var(--ft-accent) !important; }
+    .ft-hero-copy button:last-child { color: var(--ft-primary) !important; background: var(--ft-raised) !important; border: 1px solid var(--ft-border) !important; }
+    .ft-network-visual { padding: 20px; background: #f7f9fa; border: 1px solid var(--ft-border); border-radius: 12px; }
+    .ft-network-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 14px; border-bottom: 1px solid var(--ft-border); color: var(--ft-primary); font-size: 13px; }
+    .ft-network-heading small { color: var(--ft-muted); font: 11px/1.4 "IBM Plex Mono", monospace; }
+    .ft-network-body { display: grid; grid-template-columns: minmax(0, 1fr) 112px; gap: 16px; align-items: center; padding-top: 16px; }
+    .ft-network-nodes { position: relative; display: grid; gap: 8px; }
+    .ft-network-nodes::before { content: ""; position: absolute; left: 13px; top: 16px; bottom: 16px; width: 1px; background: rgba(230, 173, 76, 0.55); }
+    .ft-network-nodes::after { content: ""; position: absolute; right: -16px; top: 50%; width: 16px; height: 1px; background: rgba(230, 173, 76, 0.55); }
+    .ft-network-node { position: relative; display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; align-items: center; gap: 8px; min-height: 36px; color: var(--ft-secondary); font-size: 12px; }
+    .ft-network-node i { position: relative; z-index: 1; width: 26px; height: 26px; display: grid; place-items: center; border: 1px solid rgba(230,173,76,.6); border-radius: 50%; background: var(--ft-surface); color: var(--ft-accent); font: 10px "IBM Plex Mono", monospace; font-style: normal; }
+    .ft-network-node strong { color: var(--ft-primary); font-weight: 500; }
+    .ft-network-node small { color: var(--ft-muted); font: 10px "IBM Plex Mono", monospace; white-space: nowrap; }
+    .ft-aggregator { min-height: 92px; display: grid; place-content: center; gap: 6px; text-align: center; border: 1px solid var(--ft-border); border-radius: 10px; background: var(--ft-surface); }
+    .ft-aggregator svg { width: 22px; height: 22px; margin: 0 auto; color: var(--ft-accent); }
+    .ft-aggregator strong { font-size: 12px; color: var(--ft-primary); font-weight: 500; }
+    .ft-aggregator small { color: var(--ft-muted); font: 10px "IBM Plex Mono", monospace; }
+
+    .ft-stat-grid { display: grid !important; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0 !important; padding: 16px 0; border-top: 1px solid var(--ft-border); border-bottom: 1px solid var(--ft-border); }
+    .ft-stat-grid > div { min-width: 0; padding: 8px 20px; border: 0 !important; border-right: 1px solid var(--ft-border) !important; background: transparent !important; border-radius: 0 !important; }
+    .ft-stat-grid > div:first-child { padding-left: 0; }
+    .ft-stat-grid > div:last-child { border-right: 0 !important; }
+    .ft-stat-grid svg { display: none; }
+    .ft-stat-grid > div > div:first-child > span { display: block; color: var(--ft-muted) !important; font-size: 12px; }
+    .ft-stat-grid > div > div:nth-child(2) { display: block; margin-top: 6px; color: var(--ft-primary) !important; font: 500 26px/1.1 "IBM Plex Mono", monospace; font-variant-numeric: tabular-nums; }
+    .ft-stat-grid > div > div:nth-child(3) { margin-top: 5px; color: var(--ft-secondary) !important; font-size: 11px; }
+
+    .ft-panel, [class*="bg-slate-900"]:not(.ft-header), [class*="bg-slate-950/"], #steps-container > button {
+      background-color: var(--ft-surface) !important;
+      border-color: var(--ft-border) !important;
+      box-shadow: none !important;
+    }
+    .ft-panel, [class*="rounded-2xl"] { border-radius: 14px !important; }
+    .ft-pipeline-panel { padding: 24px !important; border: 1px solid var(--ft-border) !important; }
+    #steps-container { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px !important; }
+    .ft-step-button { display: flex; flex-direction: column; justify-content: space-between; width: 100%; min-height: 144px; padding: 14px !important; text-align: left; border: 1px solid var(--ft-border) !important; border-radius: 10px !important; background: #f7f9fa !important; color: var(--ft-primary); cursor: pointer; }
+    .ft-step-button:hover { border-color: rgba(230,173,76,.45) !important; background: var(--ft-surface) !important; }
+    .ft-step-button.ft-step-active { border-color: rgba(230,173,76,.7) !important; background: var(--ft-accent-soft) !important; }
+    .ft-step-button .ft-step-number { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%; color: var(--ft-secondary); background: var(--ft-raised); font: 11px "IBM Plex Mono", monospace; }
+    .ft-step-button.ft-step-active .ft-step-number { color: #211807; background: var(--ft-accent); }
+    .ft-step-button svg { color: var(--ft-muted) !important; }
+    .ft-step-button.ft-step-active svg { color: var(--ft-accent) !important; }
+    #step-counter { color: var(--ft-secondary) !important; background: transparent !important; border: 0 !important; border-radius: 0 !important; }
+    .ft-step-detail { display: flex; gap: 24px; align-items: center; justify-content: space-between; padding: 16px 0 0 !important; border: 0 !important; border-top: 1px solid var(--ft-border) !important; border-radius: 0 !important; background: transparent !important; }
+    .ft-value-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px !important; }
+    .ft-value-grid > div { padding: 20px 0 !important; border: 0 !important; border-top: 2px solid var(--ft-border) !important; border-radius: 0 !important; background: transparent !important; }
+    .ft-value-grid > div > div:first-child { margin-bottom: 12px !important; }
+    .ft-value-grid > div > div:first-child > div:first-child { padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: transparent !important; }
+    .ft-value-grid > div > div:first-child svg { color: var(--ft-muted) !important; }
+    .ft-value-grid > div > div:first-child > span { color: var(--ft-muted) !important; background: transparent !important; border: 0 !important; border-radius: 0 !important; }
+    .ft-value-grid h3 { color: var(--ft-primary) !important; }
+
+    .ft-chart-panel { min-width: 0; padding: 20px !important; border: 1px solid var(--ft-border) !important; border-radius: 12px !important; background: var(--ft-surface) !important; }
+    .ft-fedavg-grid { display: grid !important; grid-template-columns: minmax(0, 1.6fr) minmax(280px, 1fr) !important; gap: 20px !important; }
+    .ft-chart-panel canvas { max-width: 100%; }
+    .ft-control-panel { padding: 20px !important; border: 1px solid var(--ft-border) !important; background: var(--ft-surface) !important; }
+    .ft-output-grid { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 !important; border-top: 1px solid var(--ft-border); border-bottom: 1px solid var(--ft-border); }
+    .ft-output-grid > div { padding: 16px 18px !important; border: 0 !important; border-right: 1px solid var(--ft-border) !important; border-radius: 0 !important; background: transparent !important; }
+    .ft-output-grid > div:last-child { border-right: 0 !important; }
+    .ft-output-grid > div:first-child .text-3xl { color: var(--ft-accent) !important; }
+    .ft-simulation-layout { display: grid !important; grid-template-columns: minmax(260px, 0.88fr) minmax(0, 2fr) !important; gap: 24px !important; }
+    #slider-rows-container > div { min-height: 40px; border-radius: 8px !important; }
+    .ft-chart-frame { height: 300px !important; }
+    .ft-drift-frame { height: 280px !important; }
+    .ft-round-summary { display: flex; align-items: center; gap: 20px; padding: 0 !important; background: transparent !important; border: 0 !important; }
+    .ft-round-summary > div { text-align: left !important; }
+    #round-indicator { background: var(--ft-accent-soft) !important; color: var(--ft-accent) !important; border-color: var(--ft-border) !important; }
+
+    .ft-benchmark-panel, .ft-junction-panel, .ft-json-panel, .ft-doc-panel, .ft-team-panel { padding: 24px !important; border: 1px solid var(--ft-border) !important; background: var(--ft-surface) !important; box-shadow: none !important; }
+    #benchmark-table-body tr:hover { background: var(--ft-raised) !important; }
+    #benchmark-table-body td { padding-top: 12px !important; padding-bottom: 12px !important; }
+    #junction-drift-cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px !important; }
+    #junction-drift-cards > div { padding: 14px !important; background: #f7f9fa !important; border: 1px solid var(--ft-border) !important; border-radius: 10px !important; }
+    #json-preview-block { background: #f7f9fa !important; border-color: var(--ft-border) !important; }
+    #copy-json-btn { color: #211807 !important; background: var(--ft-accent) !important; border: 1px solid var(--ft-accent) !important; box-shadow: none !important; }
+    #tab-benchmarks table { min-width: 620px; }
+    #slider-rows-container > div { background: #f7f9fa !important; }
+    .ft-doc-rows > div { background: #f7f9fa !important; border-color: var(--ft-border) !important; border-radius: 8px !important; }
+    .ft-spec-grid > div { background: #f7f9fa !important; border-color: var(--ft-border) !important; border-radius: 8px !important; }
+    .ft-team-grid > div { background: #f7f9fa !important; border-color: var(--ft-border) !important; border-radius: 10px !important; }
+    footer { margin-top: 24px !important; padding: 18px 32px !important; background: var(--ft-bg) !important; }
+
+    @media (max-width: 1199px) {
+      .ft-header-main { min-height: 60px; grid-template-columns: minmax(0, 1fr) auto; padding: 10px 20px; }
+      .ft-desktop-nav { display: none !important; }
+      .ft-mobile-nav { display: flex !important; gap: 4px; overflow-x: auto; padding: 8px 16px !important; border-top: 1px solid var(--ft-border); scrollbar-width: none; }
+      .ft-mobile-nav::-webkit-scrollbar { display: none; }
+      .ft-main { padding: 28px 24px !important; }
+      .ft-fedavg-grid { grid-template-columns: minmax(0, 1.3fr) minmax(260px, 1fr) !important; }
+    }
+    @media (max-width: 900px) {
+      .ft-hero { grid-template-columns: minmax(0, 1fr) minmax(260px, .9fr); gap: 24px; }
+      .ft-stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 16px; }
+    .ft-stat-grid > div:nth-child(2) { border-right: 0 !important; }
+    .ft-stat-grid > div:nth-child(3) { padding-left: 0; }
+      #steps-container { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      #junction-drift-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .ft-simulation-layout { grid-template-columns: minmax(0, 1fr) !important; }
+    }
+    @media (max-width: 640px) {
+      .ft-header-main { padding: 10px 16px; }
+      .ft-brand { gap: 9px; }
+      .ft-brand-line { gap: 7px; }
+      .ft-brand h1 { font-size: 17px !important; }
+      .ft-project-id { font-size: 10px; }
+      .ft-brand p { max-width: 220px; font-size: 11px; }
+      .ft-repo-link { width: 36px; justify-content: center; padding: 8px !important; }
+      .ft-mobile-nav { padding-inline: 12px !important; }
+      .ft-mobile-nav button { padding-inline: 10px !important; }
+      .ft-main { padding: 20px 16px 28px !important; }
+      .ft-tab { gap: 24px; }
+      .ft-hero { grid-template-columns: minmax(0, 1fr); min-height: 0; gap: 24px; padding: 24px !important; }
+      .ft-hero-copy h2 { font-size: clamp(30px, 8vw, 40px) !important; }
+      .ft-hero-copy p { font-size: 14px !important; }
+      .ft-network-visual { padding: 16px; }
+      .ft-network-body { grid-template-columns: minmax(0, 1fr) 96px; gap: 10px; }
+      .ft-network-nodes::after { right: -11px; width: 11px; }
+      .ft-network-node { grid-template-columns: 26px minmax(0, 1fr); }
+      .ft-network-node small { grid-column: 2; margin-top: -7px; }
+      #slider-rows-container { max-height: none !important; overflow-y: visible !important; padding-right: 0 !important; }
+      .ft-stat-grid > div { padding: 8px 12px; }
+      .ft-stat-grid > div > div:nth-child(2) { font-size: 22px; }
+      .ft-stat-grid > div > div:nth-child(3) { font-size: 10px; }
+      #steps-container { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px !important; }
+      .ft-step-button { min-height: 132px; padding: 12px !important; }
+      .ft-step-button:last-child { grid-column: span 2; }
+      .ft-step-detail { align-items: flex-start; flex-direction: column; gap: 12px; }
+      .ft-step-detail > div:last-child { text-align: left !important; }
+      .ft-value-grid { grid-template-columns: minmax(0, 1fr); gap: 8px !important; }
+      .ft-value-grid > div { padding: 14px 0 !important; }
+      .ft-output-grid { grid-template-columns: minmax(0, 1fr); }
+      .ft-output-grid > div { border-right: 0 !important; border-bottom: 1px solid var(--ft-border) !important; padding-inline: 4px !important; }
+      .ft-output-grid > div:last-child { border-bottom: 0 !important; }
+      .ft-fedavg-grid { grid-template-columns: minmax(0, 1fr) !important; }
+      .ft-chart-frame { height: 250px !important; }
+      .ft-drift-frame { height: 250px !important; }
+      .ft-round-summary { width: 100%; gap: 12px; justify-content: flex-start; }
+      .ft-benchmark-panel, .ft-junction-panel, .ft-json-panel, .ft-doc-panel, .ft-team-panel, .ft-pipeline-panel, .ft-control-panel, .ft-chart-panel { padding: 16px !important; }
+      #junction-drift-cards { grid-template-columns: minmax(0, 1fr); }
+      .ft-doc-grid { grid-template-columns: minmax(0, 1fr) !important; }
+      .ft-doc-rows > div { align-items: flex-start !important; flex-direction: column; gap: 4px; }
+      .ft-doc-rows > div > span:last-child { overflow-wrap: anywhere; }
+      .ft-spec-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+      .ft-team-grid { grid-template-columns: minmax(0, 1fr) !important; }
+      footer { padding: 18px 16px !important; }
+      footer > div { align-items: flex-start !important; }
+      footer > div > div:last-child { flex-wrap: wrap; }
+    }
+  </style>
+<style id="ft-simulation-layout-fix">
+  #tab-simulation .ft-simulation-layout { display:grid !important; grid-template-columns:minmax(260px,0.88fr) minmax(0,2fr) !important; align-items:start; }
+  #tab-simulation .ft-simulation-layout > :first-child { grid-column:1 !important; }
+  #tab-simulation .ft-simulation-layout > :nth-child(2) { grid-column:2 !important; min-width:0; }
+  #tab-simulation .ft-chart-frame { min-height:300px; }
+  @media (max-width:900px) {
+    #tab-simulation .ft-simulation-layout { grid-template-columns:minmax(0,1fr) !important; }
+    #tab-simulation .ft-simulation-layout > :first-child,
+    #tab-simulation .ft-simulation-layout > :nth-child(2) { grid-column:1 !important; }
+  }
+  @media (max-width:640px) { #tab-simulation .ft-chart-frame { min-height:250px; } }
+</style><style id="ft-atmosphere-theme">
+  html, body { background:var(--ft-bg) !important; color:var(--ft-primary) !important; color-scheme:light; }
+  body { position:relative; isolation:isolate; }
+  .ft-header { background:rgba(241,246,247,.96) !important; }
+  .ft-network-visual, .ft-step-button, #json-preview-block,
+  #slider-rows-container > div, #junction-drift-cards > div,
+  .ft-doc-rows > div, .ft-spec-grid > div, .ft-team-grid > div {
+    background:#eef3f5 !important;
+  }
+  .ft-network-visual { background:#e3ecef !important; border-color:rgba(65,106,120,.38) !important; }
+  .ft-network-nodes::before, .ft-network-nodes::after { background:rgba(65,106,120,.66) !important; }
+  .ft-network-node i { color:#416a78 !important; border-color:rgba(65,106,120,.66) !important; }
+  .ft-network-node strong, .ft-aggregator strong { color:#183440 !important; }
+  .ft-aggregator { background:#dce8ec !important; border-color:rgba(65,106,120,.42) !important; }
+  .ft-chart-panel, .ft-control-panel, .ft-benchmark-panel, .ft-junction-panel,
+  .ft-json-panel, .ft-doc-panel, .ft-team-panel, .ft-panel {
+    background:#f7f9fa !important; border-color:var(--ft-border) !important;
+  }
+  .ft-simulation-layout > div:first-child,
+  .ft-output-grid > div { background:#f7f9fa !important; border-color:var(--ft-border) !important; }
+  .ft-simulation-layout > div:first-child { background:#edf3f5 !important; }
+  .ft-chart-frame { background:#f7f9fa !important; }
+  .ft-hero { background:#f5f8f9 !important; }
+  .ft-step-button.ft-step-active, .junc-btn[class*="bg-indigo-600/20"],
+  .model-btn[class*="bg-indigo-600/20"] { background:#f9e8dc !important; }
+  .ft-step-button.ft-step-active, .junc-btn[class*="bg-indigo-600/20"], .model-btn[class*="bg-indigo-600/20"] { border-color:rgba(199,101,27,.52) !important; }
+  #copy-json-btn, .ft-hero-copy button:first-child { color:#fff !important; }
+  .tab-nav-btn[class~="bg-indigo-600"], .mobile-nav-btn[class~="bg-indigo-600"],
+  .preset-btn[class~="bg-indigo-600"], .seed-filter-btn[class~="bg-indigo-600"] { color:#fff !important; }
+  .ft-route-backdrop { position:fixed; inset:68px 0 0; width:100%; height:calc(100% - 68px); z-index:0; pointer-events:none; opacity:.72; }
+  .ft-header, .ft-main, footer { position:relative; z-index:1; }
+  .ft-route-road { fill:none; stroke:#537b8a; stroke-width:13; stroke-linecap:round; opacity:.055; }
+  .ft-route-line { fill:none; stroke:#537b8a; stroke-width:1.2; stroke-linecap:round; opacity:.22; }
+  .ft-route-flow { fill:none; stroke:#c7651b; stroke-width:1.5; stroke-linecap:round; stroke-dasharray:1 18; opacity:.60; animation:ft-route-drift 30s linear infinite; }
+  .ft-route-flow.secondary { stroke:#416a78; stroke-dasharray:1 22; opacity:.55; animation-duration:39s; animation-direction:reverse; }
+  @keyframes ft-route-drift { to { stroke-dashoffset:-180; } }
+  @media (prefers-reduced-motion:reduce) { .ft-route-backdrop { display:none; } .ft-route-flow { animation:none; } }
+</style></head>
+<body class="min-h-screen bg-slate-950 text-slate-100 font-sans flex flex-col antialiased">
+  <svg class="ft-route-backdrop" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+    <path class="ft-route-road" d="M-120 205 C160 205 170 390 430 390 S730 110 980 150 1260 440 1740 430" />
+    <path id="ft-route-a" class="ft-route-line" d="M-120 205 C160 205 170 390 430 390 S730 110 980 150 1260 440 1740 430" />
+    <path class="ft-route-flow" d="M-120 205 C160 205 170 390 430 390 S730 110 980 150 1260 440 1740 430" />
+    <path class="ft-route-road" d="M240 -100 C240 150 520 220 520 470 S380 720 390 1030" />
+    <path d="M240 -100 C240 150 520 220 520 470 S380 720 390 1030" class="ft-route-line" />
+    <path class="ft-route-flow secondary" d="M240 -100 C240 150 520 220 520 470 S380 720 390 1030" />
+    <path class="ft-route-road" d="M1120 -80 C1120 120 930 240 1060 390 S1340 620 1300 990" />
+    <path d="M1120 -80 C1120 120 930 240 1060 390 S1340 620 1300 990" class="ft-route-line" />
+    <path class="ft-route-flow secondary" d="M1120 -80 C1120 120 930 240 1060 390 S1340 620 1300 990" />
+    <circle r="4" fill="#c7651b" opacity=".82"><animateMotion dur="28s" repeatCount="indefinite" path="M-120 205 C160 205 170 390 430 390 S730 110 980 150 1260 440 1740 430" /></circle>
+    <circle r="3" fill="#416a78" opacity=".8"><animateMotion dur="36s" begin="-12s" repeatCount="indefinite" path="M240 -100 C240 150 520 220 520 470 S380 720 390 1030" /></circle>
+  </svg>
+
+  <header class="ft-header">
+    <div class="ft-header-main">
+      <div class="ft-brand">
+        <svg class="ft-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <path d="M16 3v26M4 16h24" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+          <circle cx="16" cy="16" r="4" fill="var(--ft-bg)" stroke="currentColor" stroke-width="1.7" />
+          <circle cx="16" cy="4" r="2" fill="currentColor" />
+          <circle cx="16" cy="28" r="2" fill="currentColor" />
+          <circle cx="4" cy="16" r="2" fill="currentColor" />
+          <circle cx="28" cy="16" r="2" fill="currentColor" />
+        </svg>
+        <div class="min-w-0">
+          <div class="ft-brand-line">
+            <h1>FedTraffic</h1>
+            <span class="ft-project-id">A3-PS003-TC008</span>
+          </div>
+          <p class="truncate">Tech-4-Impact • KIT | FedTraffic Forecasting</p>
+        </div>
+      </div>
+
+      <nav class="ft-desktop-nav hidden lg:flex" aria-label="Main navigation">
+        <button type="button" onclick="switchTab('overview')" id="nav-btn-overview" class="tab-nav-btn flex items-center space-x-2 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-200"><i data-lucide="layers" class="w-4 h-4"></i><span>Overview &amp; Architecture</span></button>
+        <button type="button" onclick="switchTab('simulation')" id="nav-btn-simulation" class="tab-nav-btn flex items-center space-x-2 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-200"><i data-lucide="cpu" class="w-4 h-4"></i><span>Live Simulation Engine</span></button>
+        <button type="button" onclick="switchTab('fedavg')" id="nav-btn-fedavg" class="tab-nav-btn flex items-center space-x-2 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-200"><i data-lucide="refresh-cw" class="w-4 h-4"></i><span>FedAvg Round Visualizer</span></button>
+        <button type="button" onclick="switchTab('benchmarks')" id="nav-btn-benchmarks" class="tab-nav-btn flex items-center space-x-2 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-200"><i data-lucide="bar-chart-3" class="w-4 h-4"></i><span>Benchmarks &amp; Results</span></button>
+        <button type="button" onclick="switchTab('docs')" id="nav-btn-docs" class="tab-nav-btn flex items-center space-x-2 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-200"><i data-lucide="book-open" class="w-4 h-4"></i><span>Specs &amp; Team Docs</span></button>
+      </nav>
+
+      <a href="https://github.com/aiori-hackathon/A3-PS003-TC008" target="_blank" rel="noreferrer" class="ft-repo-link" aria-label="Open project repository">
+        <i data-lucide="git-branch" class="w-4 h-4"></i><span class="hidden sm:inline">Repository</span>
+      </a>
+    </div>
+
+    <nav class="ft-mobile-nav lg:hidden" aria-label="Main navigation">
+      <button type="button" onclick="switchTab('overview')" id="mobile-nav-btn-overview" class="mobile-nav-btn flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap"><i data-lucide="layers" class="w-3.5 h-3.5"></i><span>Overview</span></button>
+      <button type="button" onclick="switchTab('simulation')" id="mobile-nav-btn-simulation" class="mobile-nav-btn flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap"><i data-lucide="cpu" class="w-3.5 h-3.5"></i><span>Simulation</span></button>
+      <button type="button" onclick="switchTab('fedavg')" id="mobile-nav-btn-fedavg" class="mobile-nav-btn flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap"><i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i><span>FedAvg Visualizer</span></button>
+      <button type="button" onclick="switchTab('benchmarks')" id="mobile-nav-btn-benchmarks" class="mobile-nav-btn flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap"><i data-lucide="bar-chart-3" class="w-3.5 h-3.5"></i><span>Benchmarks</span></button>
+      <button type="button" onclick="switchTab('docs')" id="mobile-nav-btn-docs" class="mobile-nav-btn flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap"><i data-lucide="book-open" class="w-3.5 h-3.5"></i><span>Specs &amp; Docs</span></button>
+    </nav>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="ft-main flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- ========================================== -->
+    <!-- TAB 1: OVERVIEW & ARCHITECTURE             -->
+    <!-- ========================================== -->
+    <div id="tab-overview" class="ft-tab space-y-8 animate-fadeIn">
+      <!-- Hero Banner -->
+      <div class="ft-hero relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-950 via-slate-900 to-slate-950 border border-slate-800 p-6 sm:p-8 shadow-2xl">
+        <div class="ft-hero-copy relative z-10 max-w-3xl space-y-4">
+          <div class="inline-flex items-center space-x-2 px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-indigo-400 text-xs font-semibold">
+            <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+            <span>FedAvg Traffic Flow Intelligence Engine</span>
+          </div>
+          <h2 class="text-2xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight">
+            FedTraffic Flow Prediction with Lightweight GRUs (Privacy Preserved)
+          </h2>
+          <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+            FedTraffic enables decentralized junction nodes to collaboratively train a highly accurate next-hour traffic predictor without sharing sensitive, raw vehicular flow streams.
+          </p>
+          <div class="pt-2 flex flex-wrap gap-3">
+            <button
+              onclick="switchTab('simulation')"
+              class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold flex items-center space-x-2 transition shadow-lg shadow-indigo-600/30"
+            >
+              <span>Launch Interactive Predictor</span>
+              <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </button>
+            <button
+              onclick="switchTab('fedavg')"
+              class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-semibold flex items-center space-x-2 transition"
+            >
+              <span>Explore Round Aggregation</span>
+            </button>
+          </div>
+        </div>
+        <div class="ft-network-visual" role="img" aria-label="Federated network schematic showing four junction nodes communicating model updates to FedAvg">
+          <div class="ft-network-heading"><span>Federated junction network</span><small>Schematic</small></div>
+          <div class="ft-network-body">
+            <div class="ft-network-nodes">
+              <div class="ft-network-node"><i>01</i><strong>Junction 1</strong><small>~45 veh/hr</small></div>
+              <div class="ft-network-node"><i>02</i><strong>Junction 2</strong><small>~14 veh/hr</small></div>
+              <div class="ft-network-node"><i>03</i><strong>Junction 3</strong><small>~14 veh/hr</small></div>
+              <div class="ft-network-node"><i>04</i><strong>Junction 4</strong><small>~7 veh/hr</small></div>
+            </div>
+            <div class="ft-aggregator">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v4m0 10v4M3 12h4m10 0h4M6.3 6.3l2.8 2.8m5.8 5.8 2.8 2.8m0-11.4-2.8 2.8m-5.8 5.8-2.8 2.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="12" r="3.5" stroke="currentColor" stroke-width="1.5"/></svg>
+              <strong>FedAvg</strong><small>Global model</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top Key Metrics -->
+      <div class="ft-stat-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-slate-900/60 border border-indigo-500/20 p-5 rounded-2xl shadow-lg backdrop-blur-sm relative overflow-hidden group hover:border-slate-700 transition">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-medium text-slate-400">Total Model Parameters</span>
+            <i data-lucide="cpu" class="w-5 h-5 text-indigo-400"></i>
+          </div>
+          <div class="text-2xl font-bold text-slate-100">3,393</div>
+          <div class="text-[11px] text-slate-500 mt-1">Compact GRU Network</div>
+        </div>
+
+        <div class="bg-slate-900/60 border border-cyan-500/20 p-5 rounded-2xl shadow-lg backdrop-blur-sm relative overflow-hidden group hover:border-slate-700 transition">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-medium text-slate-400">Total Data Hours</span>
+            <i data-lucide="database" class="w-5 h-5 text-cyan-400"></i>
+          </div>
+          <div class="text-2xl font-bold text-slate-100">48,120</div>
+          <div class="text-[11px] text-slate-500 mt-1">Across 4 Junctions (2015-17)</div>
+        </div>
+
+        <div class="bg-slate-900/60 border border-amber-500/20 p-5 rounded-2xl shadow-lg backdrop-blur-sm relative overflow-hidden group hover:border-slate-700 transition">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-medium text-slate-400">Comm Cost per Round</span>
+            <i data-lucide="zap" class="w-5 h-5 text-amber-400"></i>
+          </div>
+          <div class="text-2xl font-bold text-slate-100">108.5 KB</div>
+          <div class="text-[11px] text-slate-500 mt-1">Ultra-low Network Footprint</div>
+        </div>
+
+        <div class="bg-slate-900/60 border border-emerald-500/20 p-5 rounded-2xl shadow-lg backdrop-blur-sm relative overflow-hidden group hover:border-slate-700 transition">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-medium text-slate-400">Naive Baseline Boost</span>
+            <i data-lucide="trending-up" class="w-5 h-5 text-emerald-400"></i>
+          </div>
+          <div class="text-2xl font-bold text-slate-100">+21% Accuracy</div>
+          <div class="text-[11px] text-slate-500 mt-1">vs Persistence Model</div>
+        </div>
+      </div>
+
+      <!-- Architecture Flow Diagram -->
+      <div class="ft-pipeline-panel bg-slate-900/70 border border-slate-800 rounded-2xl p-6 shadow-xl">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
+          <div>
+            <h3 class="text-lg font-bold text-white flex items-center space-x-2">
+              <i data-lucide="layers" class="w-5 h-5 text-indigo-400"></i>
+              <span>Federated Learning Execution Pipeline</span>
+            </h3>
+            <p class="text-xs text-slate-400">Sequential lifecycle of federated rounds across edge junction clients</p>
+          </div>
+          <div id="step-counter" class="text-xs text-indigo-400 font-mono bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-500/20">
+            Step 1 of 5 Active
+          </div>
+        </div>
+
+        <!-- Step Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-3 relative" id="steps-container">
+          <!-- Populated dynamically via JS -->
+        </div>
+
+        <!-- Expanded Active Step Detail -->
+        <div class="ft-step-detail mt-6 bg-slate-950/80 border border-slate-800 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div class="space-y-1">
+            <span class="text-xs font-mono text-indigo-400 uppercase tracking-wider">Detailed Specification</span>
+            <h4 id="active-step-title" class="text-sm font-semibold text-white">1. Local Preprocessing — 12-Hour Sliding Window</h4>
+            <p id="active-step-desc" class="text-xs text-slate-300 leading-relaxed">
+              Each physical junction collects continuous sensor counts. Sequences are formatted into 12-hour historical sliding temporal windows locally without external broadcast.
+            </p>
+          </div>
+          <div class="shrink-0 bg-slate-900 border border-slate-800 px-4 py-2.5 rounded-lg text-right">
+            <span class="text-[10px] text-slate-500 uppercase block">Key Telemetry</span>
+            <span id="active-step-metric" class="text-xs font-bold font-mono text-emerald-400">48,120 Total Data Hours</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Core Value Propositions -->
+      <div class="ft-value-grid grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-gradient-to-b from-emerald-500/10 via-transparent to-transparent bg-slate-900/60 border border-emerald-500/20 p-6 rounded-2xl shadow-lg relative flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="p-2.5 bg-slate-800/80 rounded-xl border border-slate-700/50">
+                <i data-lucide="lock" class="w-5 h-5 text-slate-200"></i>
+              </div>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">
+                GDPR / Privacy Compliant
+              </span>
+            </div>
+            <h3 class="text-base font-bold text-white mb-2">100% Privacy Preservation</h3>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Raw traffic count data never leaves the local junction node. Only abstracted encrypted gradient weight updates are communicated.
+            </p>
+          </div>
+        </div>
+
+        <div class="bg-gradient-to-b from-amber-500/10 via-transparent to-transparent bg-slate-900/60 border border-amber-500/20 p-6 rounded-2xl shadow-lg relative flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="p-2.5 bg-slate-800/80 rounded-xl border border-slate-700/50">
+                <i data-lucide="alert-triangle" class="w-5 h-5 text-slate-200"></i>
+              </div>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">
+                Heterogeneity Aware
+              </span>
+            </div>
+            <h3 class="text-base font-bold text-white mb-2">Non-IID Drift Resiliency</h3>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Designed specifically to mitigate local statistical distribution skew between heavy highway axes and quiet residential side-lanes.
+            </p>
+          </div>
+        </div>
+
+        <div class="bg-gradient-to-b from-indigo-500/10 via-transparent to-transparent bg-slate-900/60 border border-indigo-500/20 p-6 rounded-2xl shadow-lg relative flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="p-2.5 bg-slate-800/80 rounded-xl border border-slate-700/50">
+                <i data-lucide="zap" class="w-5 h-5 text-slate-200"></i>
+              </div>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">
+                Edge IoT Optimized
+              </span>
+            </div>
+            <h3 class="text-base font-bold text-white mb-2">Minimal Bandwidth Footprint</h3>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Consuming just ~108 KB per communication round, FedTraffic operates seamlessly over low-bandwidth cellular/IoT edge hardware.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 2: LIVE SIMULATION ENGINE             -->
+    <!-- ========================================== -->
+    <div id="tab-simulation" class="ft-tab space-y-6 hidden animate-fadeIn">
+      <!-- Control Header Grid -->
+      <div class="ft-control-panel bg-slate-900/80 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
+          <div>
+            <h2 class="text-lg font-bold text-white flex items-center space-x-2">
+              <i data-lucide="cpu" class="w-5 h-5 text-indigo-400"></i>
+              <span>GRU Traffic Inference Simulator</span>
+            </h2>
+            <p class="text-xs text-slate-400">12-Hour Sliding Window Input → 1-Hour Horizon Prediction</p>
+          </div>
+
+          <!-- Preset Buttons -->
+          <div class="flex flex-wrap gap-1.5" id="presets-btn-group">
+            <button onclick="applyPreset('morningRush')" id="preset-morningRush" class="preset-btn px-2.5 py-1 text-xs font-medium rounded-lg border transition">Morning Rush</button>
+            <button onclick="applyPreset('lateNight')" id="preset-lateNight" class="preset-btn px-2.5 py-1 text-xs font-medium rounded-lg border transition">Late Night Quiet</button>
+            <button onclick="applyPreset('weekendMidday')" id="preset-weekendMidday" class="preset-btn px-2.5 py-1 text-xs font-medium rounded-lg border transition">Weekend Midday</button>
+            <button onclick="applyPreset('rainSpike')" id="preset-rainSpike" class="preset-btn px-2.5 py-1 text-xs font-medium rounded-lg border transition">Rainy Sudden Spike</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Junction Selector -->
+          <div>
+            <label class="text-xs font-semibold text-slate-300 block mb-1.5">Target Junction Node</label>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <button onclick="selectJunction('j1')" id="junc-btn-j1" class="junc-btn p-2.5 rounded-xl border text-left transition">
+                <div class="text-xs font-bold text-white truncate">Junction 1</div>
+                <div class="text-[10px] text-slate-400">~45 veh/hr</div>
+              </button>
+              <button onclick="selectJunction('j2')" id="junc-btn-j2" class="junc-btn p-2.5 rounded-xl border text-left transition">
+                <div class="text-xs font-bold text-white truncate">Junction 2</div>
+                <div class="text-[10px] text-slate-400">~14 veh/hr</div>
+              </button>
+              <button onclick="selectJunction('j3')" id="junc-btn-j3" class="junc-btn p-2.5 rounded-xl border text-left transition">
+                <div class="text-xs font-bold text-white truncate">Junction 3</div>
+                <div class="text-[10px] text-slate-400">~14 veh/hr</div>
+              </button>
+              <button onclick="selectJunction('j4')" id="junc-btn-j4" class="junc-btn p-2.5 rounded-xl border text-left transition">
+                <div class="text-xs font-bold text-white truncate">Junction 4</div>
+                <div class="text-[10px] text-slate-400">~7 veh/hr</div>
+              </button>
+            </div>
+          </div>
+
+          <!-- Model Paradigm Selector -->
+          <div>
+            <label class="text-xs font-semibold text-slate-300 block mb-1.5">Model Architecture Paradigm</label>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <button onclick="selectModel('centralized')" id="model-btn-centralized" class="model-btn p-2.5 rounded-xl border text-left transition">
+                <div class="text-xs font-bold text-white truncate">Centralized</div>
+                <div class="text-[10px] text-indigo-400 font-mono">3.14 MAE</div>
+              </button>
+              <button onclick="selectModel('fedIid')" id="model-btn-fedIid" class="model-btn p-2.5 rounded-xl border text-left transition">
+                <div class="text-xs font-bold text-white truncate">Fed IID</div>
+                <div class="text-[10px] text-indigo-400 font-mono">3.23 MAE</div>
+              </button>
+              <button onclick="selectModel('fedNonIid')" id="model-btn-fedNonIid" class="model-btn p-2.5 rounded-xl border text-left transition">
+                <div class="text-xs font-bold text-white truncate">Fed Non-IID</div>
+                <div class="text-[10px] text-indigo-400 font-mono">3.93 MAE</div>
+              </button>
+              <button onclick="selectModel('naive')" id="model-btn-naive" class="model-btn p-2.5 rounded-xl border text-left transition">
+                <div class="text-xs font-bold text-white truncate">Persistence</div>
+                <div class="text-[10px] text-indigo-400 font-mono">4.25 MAE</div>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive Main Body: Sliders + Live Output -->
+      <div class="ft-simulation-layout grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Sliders Box (12 Historical Hours) -->
+        <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4 lg:col-span-1">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center space-x-1.5">
+              <i data-lucide="sliders" class="w-4 h-4 text-indigo-400"></i>
+              <span>12-Hour Historical Inputs</span>
+            </h3>
+            <span class="text-[10px] font-mono text-slate-400">veh / hr</span>
+          </div>
+
+          <div class="space-y-2.5 max-h-[420px] overflow-y-auto pr-1" id="slider-rows-container">
+            <!-- Dynamically generated sliders for 12 hours -->
+          </div>
+        </div>
+
+        <!-- Live Visual Charts & Inference Cards -->
+        <div class="lg:col-span-2 space-y-6">
+          <!-- Key Output Metric Panel -->
+          <div class="ft-output-grid grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="bg-slate-900/80 border border-indigo-500/30 p-4 rounded-2xl shadow-lg relative overflow-hidden">
+              <span class="text-[10px] text-slate-400 font-medium block uppercase tracking-wider">Predicted Next Hour (t+1)</span>
+              <div class="text-3xl font-extrabold text-white mt-1 font-mono">
+                <span id="predicted-val">0</span> <span class="text-xs text-slate-400 font-normal">veh/hr</span>
+              </div>
+              <div class="mt-2 text-[11px] text-emerald-400 flex items-center space-x-1">
+                <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
+                <span>Active GRU Output</span>
+              </div>
+            </div>
+
+            <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl shadow-lg">
+              <span class="text-[10px] text-slate-400 font-medium block uppercase tracking-wider">MAE Error Margin</span>
+              <div class="text-3xl font-extrabold text-indigo-400 mt-1 font-mono">
+                ±<span id="mae-margin">3.93</span>
+              </div>
+              <div class="mt-2 text-[11px] text-slate-400">
+                Model Parameter Variance
+              </div>
+            </div>
+
+            <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl shadow-lg">
+              <span class="text-[10px] text-slate-400 font-medium block uppercase tracking-wider">95% Confidence Band</span>
+              <div class="text-xl font-bold text-slate-200 mt-2 font-mono" id="ci-band">
+                [0 - 0] veh/hr
+              </div>
+              <div class="mt-2 text-[11px] text-slate-400">
+                Statistical Range
+              </div>
+            </div>
+          </div>
+
+          <!-- Forecast Horizon Chart -->
+          <div class="ft-chart-panel bg-slate-900/80 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-bold text-slate-200">12-Hour Historical Sequence + Next-Hour Forecast</h3>
+              <div class="flex items-center space-x-4 text-xs">
+                <span class="flex items-center space-x-1 text-slate-400">
+                  <span class="w-2.5 h-2.5 rounded-full bg-slate-400"></span>
+                  <span>Historical</span>
+                </span>
+                <span class="flex items-center space-x-1 text-indigo-400">
+                  <span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
+                  <span>Forecast</span>
+                </span>
+              </div>
+            </div>
+
+            <div class="ft-chart-frame h-64 w-full relative">
+              <canvas id="simulationChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 3: VISUAL FEDAVG ROUND SIMULATOR       -->
+    <!-- ========================================== -->
+    <div id="tab-fedavg" class="ft-tab space-y-6 hidden animate-fadeIn">
+      <!-- Round Interactive Slider Bar -->
+      <div class="ft-control-panel bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-lg font-bold text-white flex items-center space-x-2">
+              <i data-lucide="refresh-cw" class="w-5 h-5 text-indigo-400"></i>
+              <span>FedAvg Round Communication Visualizer</span>
+            </h2>
+            <p class="text-xs text-slate-400">Step through federated rounds to inspect loss convergence &amp; weight drift</p>
+          </div>
+
+          <div class="ft-round-summary flex items-center space-x-3 bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+            <div class="text-right">
+              <span class="text-[10px] text-slate-500 uppercase block font-mono">Cumulative Comm Bandwidth</span>
+              <span class="text-sm font-bold font-mono text-emerald-400" id="accumulated-bytes">1.55 MB</span>
+            </div>
+            <div class="h-8 w-px bg-slate-800"></div>
+            <div class="text-right">
+              <span class="text-[10px] text-slate-500 uppercase block font-mono">Payload / Round</span>
+              <span class="text-sm font-bold font-mono text-indigo-400">108.5 KB</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Round Range Control -->
+        <div class="space-y-2 pt-2">
+          <div class="flex justify-between items-center text-xs font-semibold">
+            <span class="text-slate-400">Communication Round Selector</span>
+            <span class="text-indigo-400 font-mono text-sm bg-indigo-500/10 px-3 py-0.5 rounded-full border border-indigo-500/30" id="round-indicator">
+              Round 15 of 30
+            </span>
+          </div>
+          <input
+            type="range"
+            min="1"
+            max="30"
+            value="15"
+            id="roundSlider"
+            oninput="handleRoundChange(this.value)"
+            class="w-full accent-indigo-500 bg-slate-800 rounded-lg h-2 cursor-pointer"
+          />
+          <div class="flex justify-between text-[10px] font-mono text-slate-500">
+            <span>Round 1 (Initial Weights)</span>
+            <span>Round 15 (Mid Convergence)</span>
+            <span>Round 30 (Fully Converged)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Visual Charts Grid -->
+      <div class="ft-fedavg-grid grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Convergence Loss Graph -->
+        <div class="ft-chart-panel bg-slate-900/60 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-bold text-white">Loss Convergence Dynamics</h3>
+              <p class="text-[11px] text-slate-400">Training Loss over 30 Federated Communication Rounds</p>
+            </div>
+          </div>
+
+          <div class="ft-chart-frame h-72 w-full relative">
+            <canvas id="lossChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Client Weight Drift Visualizer -->
+        <div class="ft-chart-panel bg-slate-900/60 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-bold text-white">Client Weight Drift Vector (|Δw|)</h3>
+              <p class="text-[11px] text-slate-400">Magnitude of gradient updates per junction node</p>
+            </div>
+          </div>
+
+          <div class="ft-drift-frame h-72 w-full relative">
+            <canvas id="weightDriftChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 4: EXPERIMENTAL RESULTS & BENCHMARKS   -->
+    <!-- ========================================== -->
+    <div id="tab-benchmarks" class="ft-tab space-y-6 hidden animate-fadeIn">
+      <!-- Benchmark Metric Cards -->
+      <div class="ft-benchmark-panel bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+          <div>
+            <h2 class="text-lg font-bold text-white flex items-center space-x-2">
+              <i data-lucide="bar-chart-3" class="w-5 h-5 text-indigo-400"></i>
+              <span>Experimental Benchmarks across 3 Random Seeds</span>
+            </h2>
+            <p class="text-xs text-slate-400">Statistical evaluation comparing Centralized vs Federated Paradigms</p>
+          </div>
+
+          <div class="flex items-center space-x-2">
+            <span class="text-xs text-slate-400 font-medium">Filter Seed:</span>
+            <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800" id="seed-filter-group">
+              <button onclick="setBenchmarkSeed('mean')" id="seed-btn-mean" class="seed-filter-btn px-2.5 py-1 text-xs font-mono font-medium rounded-lg transition">3-Seed Mean</button>
+              <button onclick="setBenchmarkSeed('0')" id="seed-btn-0" class="seed-filter-btn px-2.5 py-1 text-xs font-mono font-medium rounded-lg transition">Seed 0</button>
+              <button onclick="setBenchmarkSeed('1')" id="seed-btn-1" class="seed-filter-btn px-2.5 py-1 text-xs font-mono font-medium rounded-lg transition">Seed 1</button>
+              <button onclick="setBenchmarkSeed('2')" id="seed-btn-2" class="seed-filter-btn px-2.5 py-1 text-xs font-mono font-medium rounded-lg transition">Seed 2</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dynamic Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="border-b border-slate-800 text-slate-400 font-semibold uppercase tracking-wider">
+                <th class="py-3 px-4">Model Paradigm</th>
+                <th class="py-3 px-4">Mean Absolute Error (MAE)</th>
+                <th class="py-3 px-4">Root Mean Sq Error (RMSE)</th>
+                <th class="py-3 px-4">Classification Badge</th>
+              </tr>
+            </thead>
+            <tbody id="benchmark-table-body" class="divide-y divide-slate-800/60 font-mono">
+              <!-- Dynamically populated via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Per-Junction Non-IID Drift Breakdown -->
+      <div class="ft-junction-panel bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+        <div>
+          <h3 class="text-base font-bold text-white flex items-center space-x-2">
+            <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-400"></i>
+            <span>Per-Junction Non-IID Statistical Drift Analysis</span>
+          </h3>
+          <p class="text-xs text-slate-400">Junction 1 exhibits significant Non-IID performance degradation due to heavy vehicular distribution skew</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="junction-drift-cards">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+
+      <!-- Exportable JSON Preview Component -->
+      <div class="ft-json-panel bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-sm font-bold text-white flex items-center space-x-2">
+              <i data-lucide="terminal" class="w-4 h-4 text-indigo-400"></i>
+              <span>Exportable Benchmark Payload (JSON Format)</span>
+            </h3>
+            <p class="text-xs text-slate-400">Structured telemetry ready for paper reproduction and validation</p>
+          </div>
+          <button
+            onclick="copyJSONPayload()"
+            id="copy-json-btn"
+            class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition shadow"
+          >
+            <i data-lucide="copy" class="w-3.5 h-3.5" id="copy-json-icon"></i>
+            <span id="copy-json-text">Copy JSON Payload</span>
+          </button>
+        </div>
+
+        <pre id="json-preview-block" class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-slate-300 text-xs font-mono overflow-x-auto max-h-48 leading-relaxed"></pre>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 5: TECHNICAL SPECS & DOCS              -->
+    <!-- ========================================== -->
+    <div id="tab-docs" class="ft-tab space-y-6 hidden animate-fadeIn">
+      <!-- System Hardware & Software Specs -->
+      <div class="ft-doc-grid grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Software & Dataset Stack -->
+        <div class="ft-doc-panel ft-doc-rows bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+          <h3 class="text-base font-bold text-white flex items-center space-x-2">
+            <i data-lucide="server" class="w-5 h-5 text-indigo-400"></i>
+            <span>Software &amp; Dataset Environment</span>
+          </h3>
+
+          <div class="space-y-3 text-xs">
+            <div class="p-3 bg-slate-950 rounded-xl border border-slate-800/80 flex items-center justify-between">
+              <span class="text-slate-400">Deep Learning Framework</span>
+              <span class="font-mono font-bold text-indigo-300">PyTorch 2.1.0 (CUDA 11.8)</span>
+            </div>
+            <div class="p-3 bg-slate-950 rounded-xl border border-slate-800/80 flex items-center justify-between">
+              <span class="text-slate-400">Hardware Platform</span>
+              <span class="font-mono font-bold text-emerald-400">NVIDIA RTX 3050 Laptop GPU</span>
+            </div>
+            <div class="p-3 bg-slate-950 rounded-xl border border-slate-800/80 flex items-center justify-between">
+              <span class="text-slate-400">Source Dataset</span>
+              <span class="font-mono font-bold text-slate-200">Kaggle traffic.csv (Nov 2015 - Jun 2017)</span>
+            </div>
+            <div class="p-3 bg-slate-950 rounded-xl border border-slate-800/80 flex items-center justify-between">
+              <span class="text-slate-400">Temporal Train/Test Split</span>
+              <span class="font-mono font-bold text-amber-300">Split Date: May 1, 2017</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Model Architecture Specifications -->
+        <div class="ft-doc-panel bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+          <h3 class="text-base font-bold text-white flex items-center space-x-2">
+            <i data-lucide="cpu" class="w-5 h-5 text-indigo-400"></i>
+            <span>Lightweight GRU Hyperparameters</span>
+          </h3>
+
+          <div class="ft-spec-grid grid grid-cols-2 gap-3 text-xs">
+            <div class="p-3 bg-slate-950 rounded-xl border border-slate-800/80">
+              <span class="text-slate-500 block text-[10px] uppercase">Input Sequence Window</span>
+              <span class="text-sm font-bold font-mono text-slate-200 mt-1 block">12 Hours</span>
+            </div>
+            <div class="p-3 bg-slate-950 rounded-xl border border-slate-800/80">
+              <span class="text-slate-500 block text-[10px] uppercase">GRU Hidden Units</span>
+              <span class="text-sm font-bold font-mono text-indigo-400 mt-1 block">32 Units</span>
+            </div>
+            <div class="p-3 bg-slate-950 rounded-xl border border-slate-800/80">
+              <span class="text-slate-500 block text-[10px] uppercase">Total Parameter Count</span>
+              <span class="text-sm font-bold font-mono text-emerald-400 mt-1 block">3,393 Params</span>
+            </div>
+            <div class="p-3 bg-slate-950 rounded-xl border border-slate-800/80">
+              <span class="text-slate-500 block text-[10px] uppercase">Comm Bytes / Node</span>
+              <span class="text-sm font-bold font-mono text-amber-400 mt-1 block">13,572 Bytes</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Setup Commands -->
+      <div class="ft-doc-panel bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-bold text-white flex items-center space-x-2">
+            <i data-lucide="terminal" class="w-4 h-4 text-indigo-400"></i>
+            <span>Quick Start Terminal Command</span>
+          </h3>
+          <button
+            onclick="copyCloneCmd()"
+            id="copy-cmd-btn"
+            class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-xs font-mono flex items-center space-x-1 transition"
+          >
+            <i data-lucide="copy" class="w-3.5 h-3.5" id="copy-cmd-icon"></i>
+            <span id="copy-cmd-text">Copy</span>
+          </button>
+        </div>
+
+        <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 font-mono text-xs text-emerald-400 overflow-x-auto">
+          $ git clone https://github.com/Tech-4-Impact/FedTraffic.git &amp;&amp; cd FedTraffic &amp;&amp; pip install -r requirements.txt
+        </div>
+      </div>
+
+      <!-- Team Roster Section -->
+      <div class="ft-team-panel bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+        <div>
+          <h3 class="text-base font-bold text-white flex items-center space-x-2">
+            <i data-lucide="users" class="w-5 h-5 text-indigo-400"></i>
+            <span>Team Tech-4-Impact • Kalaignarkarunanidhi Institute of Technology (KIT-CBE)</span>
+          </h3>
+          <p class="text-xs text-slate-400">Project ID: A3-PS003-TC008</p>
+        </div>
+
+        <div class="ft-team-grid grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-4 flex items-start space-x-3">
+            <div class="p-2.5 bg-indigo-600/10 border border-indigo-500/20 rounded-xl text-indigo-400">
+              <i data-lucide="database" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h4 class="text-xs font-bold text-white">Mr. Gowtham</h4>
+              <span class="text-[11px] text-indigo-400 font-medium block">Project Mentor</span>
+              <p class="text-[10px] text-slate-500 mt-1">System Guidance &amp; Research Lead</p>
+            </div>
+          </div>
+
+          <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-4 flex items-start space-x-3">
+            <div class="p-2.5 bg-indigo-600/10 border border-indigo-500/20 rounded-xl text-indigo-400">
+              <i data-lucide="cpu" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h4 class="text-xs font-bold text-white">Abhinav Hari K</h4>
+              <span class="text-[11px] text-indigo-400 font-medium block">ML Engineer</span>
+              <p class="text-[10px] text-slate-500 mt-1">GRU Architecture &amp; FedAvg Protocol</p>
+            </div>
+          </div>
+
+          <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-4 flex items-start space-x-3">
+            <div class="p-2.5 bg-indigo-600/10 border border-indigo-500/20 rounded-xl text-indigo-400">
+              <i data-lucide="award" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h4 class="text-xs font-bold text-white">Sajal Gupta</h4>
+              <span class="text-[11px] text-indigo-400 font-medium block">Data &amp; Systems Lead</span>
+              <p class="text-[10px] text-slate-500 mt-1">Preprocessing &amp; Dataset Pipeline</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-slate-900/60 border-t border-slate-800/80 py-6 text-xs text-slate-400 mt-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center space-x-2">
+        <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
+        <span>FedTraffic Federated Learning Protocol • Zero-Raw Data Transmission</span>
+      </div>
+      <div class="flex items-center space-x-4">
+        <span>Project ID: <strong class="text-slate-200">A3-PS003-TC008</strong></span>
+        <span>Team: <strong class="text-indigo-400">Tech-4-Impact (KIT)</strong></span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ======================================================== -->
+  <!-- JAVASCRIPT CONTROLLERS & DATA LOGIC (100% IDENTICAL)    -->
+  <!-- ======================================================== -->
+  <script>
+    // --- DATA & CONSTANTS ---
+    const BENCHMARK_DATA = [
+      { model: 'Centralized Baseline', maeMean: 3.141, maeStd: 0.026, rmseMean: 4.927, rmseStd: 0.047, badge: 'Upper Bound', color: '#10b981' },
+      { model: 'Federated IID', maeMean: 3.232, maeStd: 0.004, rmseMean: 5.109, rmseStd: 0.012, badge: 'Near-Optimal', color: '#3b82f6' },
+      { model: 'Federated Non-IID', maeMean: 3.931, maeStd: 0.201, rmseMean: 6.354, rmseStd: 0.348, badge: 'Realistic Privacy', color: '#f59e0b' },
+      { model: 'Naive Persistence', maeMean: 4.250, maeStd: 0.110, rmseMean: 6.810, rmseStd: 0.220, badge: 'Baseline', color: '#ef4444' }
+    ];
+
+    const SEED_BENCHMARKS = {
+      0: [
+        { model: 'Centralized', mae: 3.118, rmse: 4.882 },
+        { model: 'Fed IID', mae: 3.228, rmse: 5.098 },
+        { model: 'Fed Non-IID', mae: 3.731, rmse: 6.008 },
+        { model: 'Naive Persistence', mae: 4.140, rmse: 6.590 }
+      ],
+      1: [
+        { model: 'Centralized', mae: 3.167, rmse: 4.974 },
+        { model: 'Fed IID', mae: 3.236, rmse: 5.121 },
+        { model: 'Fed Non-IID', mae: 4.132, rmse: 6.702 },
+        { model: 'Naive Persistence', mae: 4.360, rmse: 7.030 }
+      ],
+      2: [
+        { model: 'Centralized', mae: 3.138, rmse: 4.925 },
+        { model: 'Fed IID', mae: 3.232, rmse: 5.108 },
+        { model: 'Fed Non-IID', mae: 3.930, rmse: 6.352 },
+        { model: 'Naive Persistence', mae: 4.250, rmse: 6.810 }
+      ]
+    };
+
+    const JUNCTION_METRICS = [
+      { junction: 'Junction 1 (Heavy)', volume: '~45 veh/hr', centralizedMAE: 4.51, fedIIDMAE: 4.72, fedNonIIDMAE: 7.71, driftFactor: 'High (Heavy Skew)' },
+      { junction: 'Junction 2 (Medium)', volume: '~14 veh/hr', centralizedMAE: 2.74, fedIIDMAE: 2.81, fedNonIIDMAE: 2.88, driftFactor: 'Low' },
+      { junction: 'Junction 3 (Medium)', volume: '~14 veh/hr', centralizedMAE: 2.65, fedIIDMAE: 2.69, fedNonIIDMAE: 2.72, driftFactor: 'Low' },
+      { junction: 'Junction 4 (Light)', volume: '~7 veh/hr', centralizedMAE: 2.66, fedIIDMAE: 2.71, fedNonIIDMAE: 2.41, driftFactor: 'Moderate (Low Traffic)' }
+    ];
+
+    const PRESETS = {
+      morningRush: { name: 'Morning Rush', sequence: [12, 14, 18, 25, 38, 52, 68, 75, 71, 62, 55, 48] },
+      lateNight: { name: 'Late Night Quiet', sequence: [15, 12, 8, 5, 4, 3, 3, 5, 8, 12, 16, 22] },
+      weekendMidday: { name: 'Weekend Midday', sequence: [20, 22, 28, 35, 42, 45, 48, 50, 47, 44, 40, 36] },
+      rainSpike: { name: 'Rainy Sudden Spike', sequence: [25, 26, 24, 25, 27, 30, 58, 82, 94, 88, 70, 50] }
+    };
+
+    const JUNCTION_CONFIGS = {
+      j1: { name: 'Junction 1', desc: 'Heavy Traffic Axis', volume: '~45 veh/hr', baseVol: 45, multiplier: 1.0, nonIidError: 7.71, iidError: 4.72 },
+      j2: { name: 'Junction 2', desc: 'Medium Traffic Arterial', volume: '~14 veh/hr', baseVol: 14, multiplier: 0.35, nonIidError: 2.88, iidError: 2.81 },
+      j3: { name: 'Junction 3', desc: 'Medium Commercial Strip', volume: '~14 veh/hr', baseVol: 14, multiplier: 0.35, nonIidError: 2.72, iidError: 2.69 },
+      j4: { name: 'Junction 4', desc: 'Light Residential Bypass', volume: '~7 veh/hr', baseVol: 7, multiplier: 0.18, nonIidError: 2.41, iidError: 2.71 }
+    };
+
+    const STEPS = [
+      {
+        title: '1. Local Preprocessing',
+        sub: '12-Hour Sliding Window',
+        desc: 'Each physical junction collects continuous sensor counts. Sequences are formatted into 12-hour historical sliding temporal windows locally without external broadcast.',
+        metric: '48,120 Total Data Hours',
+        icon: 'hard-drive'
+      },
+      {
+        title: '2. Local GRU Training',
+        sub: '32 Hidden Unit Architecture',
+        desc: 'A lightweight Gated Recurrent Unit (GRU) neural network executes local batch SGD updates directly on junction node hardware (CUDA/CPU).',
+        metric: '3,393 Parameters Total',
+        icon: 'cpu'
+      },
+      {
+        title: '3. Encrypted Upload',
+        sub: 'Zero Raw-Data Sharing',
+        desc: 'Local model weight parameters (theta) are encrypted and dispatched to the central orchestrator via compressed payloads.',
+        metric: '13,572 Bytes Payload / Client',
+        icon: 'lock'
+      },
+      {
+        title: '4. FedAvg Aggregation',
+        sub: 'Parameter Averaging',
+        desc: 'Central orchestrator computes federated average: w_{t+1} = sum (n_k / N) * w_{t+1}^k across all active edge nodes.',
+        metric: '108.5 KB Comm / Round',
+        icon: 'refresh-cw'
+      },
+      {
+        title: '5. Model Broadcast',
+        sub: 'Global Synchronized Update',
+        desc: 'Updated global model weights are redistributed to junctions, completing one communication iteration while resilience against drift is enhanced.',
+        metric: '+21% Accuracy over Naive',
+        icon: 'globe'
+      }
+    ];
+
+    // State
+    let currentTab = 'overview';
+    let currentStep = 0;
+    let selectedJunction = 'j1';
+    let selectedModel = 'fedNonIid';
+    let sequence = [...PRESETS.morningRush.sequence];
+    let presetKey = 'morningRush';
+    let currentRound = 15;
+    let currentSeed = 'mean';
+
+    // Chart instances
+    let simChartInstance = null;
+    let lossChartInstance = null;
+    let weightDriftChartInstance = null;
+
+    // --- TAB SWITCHING ---
+    function switchTab(tabId) {
+      currentTab = tabId;
+      const tabs = ['overview', 'simulation', 'fedavg', 'benchmarks', 'docs'];
+      
+      tabs.forEach(t => {
+        const el = document.getElementById(`tab-${t}`);
+        if (el) {
+          if (t === tabId) {
+            el.classList.remove('hidden');
+          } else {
+            el.classList.add('hidden');
+          }
+        }
+
+        // Desktop nav btn
+        const btn = document.getElementById(`nav-btn-${t}`);
+        if (btn) {
+          if (t === tabId) {
+            btn.className = 'tab-nav-btn flex items-center space-x-2 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 bg-indigo-600 text-white shadow-md shadow-indigo-600/30';
+          } else {
+            btn.className = 'tab-nav-btn flex items-center space-x-2 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50';
+          }
+        }
+
+        // Mobile nav btn
+        const mobBtn = document.getElementById(`mobile-nav-btn-${t}`);
+        if (mobBtn) {
+          if (t === tabId) {
+            mobBtn.className = 'mobile-nav-btn flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap bg-indigo-600 text-white';
+          } else {
+            mobBtn.className = 'mobile-nav-btn flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap text-slate-400 hover:bg-slate-800';
+          }
+        }
+      });
+
+      // Handle chart resizes or initializations on tab show
+      if (tabId === 'simulation') {
+        setTimeout(renderSimulation, 50);
+      } else if (tabId === 'fedavg') {
+        setTimeout(() => {
+          renderLossChart();
+          renderWeightDriftChart();
+        }, 50);
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      lucide.createIcons();
+    }
+
+    // --- OVERVIEW PIPELINE STEPS ---
+    function renderOverviewSteps() {
+      const container = document.getElementById('steps-container');
+      if (!container) return;
+
+      container.innerHTML = STEPS.map((step, idx) => {
+        const isSelected = currentStep === idx;
+        const activeClass = isSelected
+          ? 'bg-slate-800/90 border-indigo-500 shadow-lg shadow-indigo-500/10 ring-1 ring-indigo-500/50'
+          : 'bg-slate-950/50 border-slate-800 hover:border-slate-700 hover:bg-slate-900/40';
+        const numBadge = isSelected
+          ? 'bg-indigo-600 text-white'
+          : 'bg-slate-800 text-slate-400';
+        const iconColor = isSelected ? 'text-indigo-400' : 'text-slate-500';
+
+        return `
+          <div
+            onclick="selectStep(${idx})"
+            class="cursor-pointer p-4 rounded-xl border transition-all duration-300 relative flex flex-col justify-between ${activeClass}"
+          >
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <span class="w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center ${numBadge}">
+                  ${idx + 1}
+                </span>
+                <i data-lucide="${step.icon}" class="w-4 h-4 ${iconColor}"></i>
+              </div>
+              <h4 class="text-xs font-bold text-slate-200">${step.title}</h4>
+              <p class="text-[10px] text-slate-400 mt-1">${step.sub}</p>
+            </div>
+            <div class="mt-3 pt-2 border-t border-slate-800/60">
+              <span class="text-[10px] font-mono text-indigo-300 block truncate">${step.metric}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      Array.from(container.children).forEach((stepButton, index) => {
+        const isActive = index === currentStep;
+        stepButton.classList.add('ft-step-button');
+        stepButton.classList.toggle('ft-step-active', isActive);
+        stepButton.setAttribute('role', 'button');
+        stepButton.setAttribute('tabindex', '0');
+        stepButton.setAttribute('aria-pressed', String(isActive));
+        stepButton.addEventListener('keydown', event => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            selectStep(index);
+          }
+        });
+      });
+
+      // Update expanded detail card
+      const active = STEPS[currentStep];
+      document.getElementById('step-counter').textContent = `Step ${currentStep + 1} of 5 Active`;
+      document.getElementById('active-step-title').textContent = `${active.title} — ${active.sub}`;
+      document.getElementById('active-step-desc').textContent = active.desc;
+      document.getElementById('active-step-metric').textContent = active.metric;
+
+      lucide.createIcons();
+    }
+
+    function selectStep(idx) {
+      currentStep = idx;
+      renderOverviewSteps();
+    }
+
+    // --- SIMULATION ENGINE ---
+    function renderSliders() {
+      const container = document.getElementById('slider-rows-container');
+      if (!container) return;
+      const junc = JUNCTION_CONFIGS[selectedJunction];
+
+      container.innerHTML = sequence.map((val, idx) => {
+        const scaledVal = Math.round(val * junc.multiplier);
+        return `
+          <div class="bg-slate-950/60 p-2 rounded-lg border border-slate-800/80 flex items-center space-x-3">
+            <span class="w-12 text-[11px] font-mono text-slate-400">t-${12 - idx}h</span>
+            <input
+              type="range"
+              min="0"
+              max="120"
+              value="${val}"
+              oninput="handleSliderChange(${idx}, this.value)"
+              class="flex-1 accent-indigo-500 bg-slate-800 rounded-lg h-1.5 cursor-pointer"
+            />
+            <span class="w-10 text-right font-mono text-xs font-bold text-indigo-300">
+              ${scaledVal}
+            </span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function handleSliderChange(idx, val) {
+      sequence[idx] = Number(val);
+      presetKey = 'custom';
+      updatePresetButtons();
+      renderSliders();
+      renderSimulation();
+    }
+
+    function applyPreset(key) {
+      presetKey = key;
+      sequence = [...PRESETS[key].sequence];
+      updatePresetButtons();
+      renderSliders();
+      renderSimulation();
+    }
+
+    function updatePresetButtons() {
+      ['morningRush', 'lateNight', 'weekendMidday', 'rainSpike'].forEach(k => {
+        const btn = document.getElementById(`preset-${k}`);
+        if (btn) {
+          if (presetKey === k) {
+            btn.className = 'preset-btn px-2.5 py-1 text-xs font-medium rounded-lg border transition bg-indigo-600 text-white border-indigo-500';
+          } else {
+            btn.className = 'preset-btn px-2.5 py-1 text-xs font-medium rounded-lg border transition bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700 hover:text-slate-200';
+          }
+        }
+      });
+    }
+
+    function selectJunction(jKey) {
+      selectedJunction = jKey;
+      ['j1', 'j2', 'j3', 'j4'].forEach(k => {
+        const btn = document.getElementById(`junc-btn-${k}`);
+        if (btn) {
+          if (k === jKey) {
+            btn.className = 'junc-btn p-2.5 rounded-xl border text-left transition bg-indigo-600/20 border-indigo-500 text-indigo-300';
+          } else {
+            btn.className = 'junc-btn p-2.5 rounded-xl border text-left transition bg-slate-950/50 border-slate-800 text-slate-400 hover:border-slate-700';
+          }
+        }
+      });
+      renderSliders();
+      renderSimulation();
+    }
+
+    function selectModel(mKey) {
+      selectedModel = mKey;
+      ['centralized', 'fedIid', 'fedNonIid', 'naive'].forEach(k => {
+        const btn = document.getElementById(`model-btn-${k}`);
+        if (btn) {
+          if (k === mKey) {
+            btn.className = 'model-btn p-2.5 rounded-xl border text-left transition bg-indigo-600/20 border-indigo-500 text-indigo-300';
+          } else {
+            btn.className = 'model-btn p-2.5 rounded-xl border text-left transition bg-slate-950/50 border-slate-800 text-slate-400 hover:border-slate-700';
+          }
+        }
+      });
+      renderSimulation();
+    }
+
+    function renderSimulation() {
+      const junctionInfo = JUNCTION_CONFIGS[selectedJunction];
+      const last = sequence[sequence.length - 1];
+      const secondLast = sequence[sequence.length - 2];
+      const trend = last - secondLast;
+
+      let basePredict = last + trend * 0.45;
+      let mae = 3.93;
+      let ciMargin = 4.2;
+
+      if (selectedModel === 'centralized') {
+        basePredict = last + trend * 0.52;
+        mae = 3.14;
+        ciMargin = 3.1;
+      } else if (selectedModel === 'fedIid') {
+        basePredict = last + trend * 0.48;
+        mae = junctionInfo.iidError;
+        ciMargin = 3.5;
+      } else if (selectedModel === 'fedNonIid') {
+        basePredict = last + trend * 0.40;
+        mae = junctionInfo.nonIidError;
+        ciMargin = mae * 1.15;
+      } else if (selectedModel === 'naive') {
+        basePredict = last; // Persistence
+        mae = 4.25;
+        ciMargin = 5.8;
+      }
+
+      const predictedVal = Math.max(1, Math.round(basePredict * junctionInfo.multiplier));
+      const lowerCI = Math.max(0, Math.round(predictedVal - ciMargin));
+      const upperCI = Math.round(predictedVal + ciMargin);
+
+      // Update text displays
+      document.getElementById('predicted-val').textContent = predictedVal;
+      document.getElementById('mae-margin').textContent = mae.toFixed(2);
+      document.getElementById('ci-band').textContent = `[${lowerCI} - ${upperCI}] veh/hr`;
+
+      // Chart Data
+      const labels = sequence.map((_, i) => `t-${12 - i}h`);
+      labels.push('Forecast (t+1h)');
+
+      const historyData = sequence.map(v => Math.round(v * junctionInfo.multiplier));
+      historyData.push(Math.round(sequence[11] * junctionInfo.multiplier)); // Anchor to forecast point
+
+      const forecastData = new Array(sequence.length).fill(null);
+      forecastData[sequence.length - 1] = Math.round(sequence[11] * junctionInfo.multiplier); // connect line
+      forecastData.push(predictedVal);
+
+      const ctx = document.getElementById('simulationChart');
+      if (!ctx) return;
+
+      if (simChartInstance) {
+        simChartInstance.destroy();
+      }
+
+      simChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'History (veh/hr)',
+              data: historyData,
+              borderColor: '#5f7588',
+              backgroundColor: 'transparent',
+              fill: false,
+              tension: 0.35,
+              borderWidth: 2,
+              pointRadius: 2.5,
+              pointBackgroundColor: '#5f7588'
+            },
+            {
+              label: 'Forecast (veh/hr)',
+              data: forecastData,
+              borderColor: '#e6ad4c',
+              backgroundColor: 'rgba(230, 173, 76, 0.12)',
+              fill: true,
+              tension: 0.35,
+              borderWidth: 3,
+              pointRadius: 4,
+              pointBackgroundColor: '#e6ad4c',
+              pointBorderColor: '#ffffff',
+              pointBorderWidth: 1.5
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: 'index',
+            intersect: false
+          },
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              backgroundColor: '#ffffff',
+              borderColor: 'rgba(52, 77, 96, 0.20)',
+              borderWidth: 1,
+              titleColor: '#202b35',
+              bodyColor: '#52616d',
+              padding: 10,
+              displayColors: true,
+              callbacks: {
+                label: function(context) {
+                  if (context.raw === null) return null;
+                  return `${context.dataset.label}: ${context.raw} veh/hr`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(177, 183, 196, 0.12)' },
+              ticks: { color: '#5f7588', font: { size: 10 } }
+            },
+            y: {
+              grid: { color: 'rgba(177, 183, 196, 0.12)' },
+              ticks: { color: '#5f7588', font: { size: 10 } },
+              suggestedMin: 0
+            }
+          }
+        }
+      });
+    }
+
+    // --- VISUAL FEDAVG TAB ---
+    function handleRoundChange(val) {
+      currentRound = Number(val);
+      document.getElementById('round-indicator').textContent = `Round ${currentRound} of 30`;
+
+      // Bytes calculation
+      const bytesPerRound = 108576; // 13,572 * 4 clients * 2 ways
+      const totalMB = ((currentRound * bytesPerRound) / (1024 * 1024)).toFixed(2);
+      document.getElementById('accumulated-bytes').textContent = `${totalMB} MB`;
+
+      renderWeightDriftChart();
+    }
+
+    function renderLossChart() {
+      const ctx = document.getElementById('lossChart');
+      if (!ctx) return;
+
+      if (lossChartInstance) {
+        lossChartInstance.destroy();
+      }
+
+      const rounds = [];
+      const centralized = [];
+      const fedIid = [];
+      const fedNonIid = [];
+
+      for (let r = 1; r <= 30; r++) {
+        rounds.push(r);
+        const centLoss = 0.15 + 0.85 * Math.exp(-r / 4);
+        const iidLoss = 0.18 + 0.82 * Math.exp(-r / 5);
+        const nonIidLoss = 0.28 + 0.72 * Math.exp(-r / 7.5) + (r < 15 ? 0.04 * Math.sin(r) : 0);
+
+        centralized.push(Number(centLoss.toFixed(3)));
+        fedIid.push(Number(iidLoss.toFixed(3)));
+        fedNonIid.push(Number(nonIidLoss.toFixed(3)));
+      }
+
+      lossChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: rounds,
+          datasets: [
+            {
+              label: 'Centralized',
+              data: centralized,
+              borderColor: '#10b981',
+              backgroundColor: '#10b981',
+              borderWidth: 2,
+              pointRadius: 0,
+              tension: 0.3
+            },
+            {
+              label: 'FedIID',
+              data: fedIid,
+              borderColor: '#3b82f6',
+              backgroundColor: '#3b82f6',
+              borderWidth: 2,
+              pointRadius: 0,
+              tension: 0.3
+            },
+            {
+              label: 'FedNonIID',
+              data: fedNonIid,
+              borderColor: '#f59e0b',
+              backgroundColor: '#f59e0b',
+              borderWidth: 2,
+              pointRadius: 0,
+              tension: 0.3
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              labels: { color: '#5f7588', font: { size: 11 } }
+            },
+            tooltip: {
+              backgroundColor: '#ffffff',
+              borderColor: 'rgba(52, 77, 96, 0.20)',
+              borderWidth: 1,
+              titleColor: '#202b35',
+              bodyColor: '#52616d'
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(177, 183, 196, 0.12)' },
+              ticks: { color: '#5f7588', font: { size: 10 } },
+              title: { display: true, text: 'Round', color: '#5f7588', font: { size: 10 } }
+            },
+            y: {
+              grid: { color: 'rgba(177, 183, 196, 0.12)' },
+              ticks: { color: '#5f7588', font: { size: 10 } }
+            }
+          }
+        }
+      });
+    }
+
+    function renderWeightDriftChart() {
+      const ctx = document.getElementById('weightDriftChart');
+      if (!ctx) return;
+
+      if (weightDriftChartInstance) {
+        weightDriftChartInstance.destroy();
+      }
+
+      const driftRatio = Math.max(0.1, 1 - currentRound / 30);
+      const layers = ['GRU input_w', 'GRU hidden_w', 'Dense output_w', 'Biases'];
+
+      const j1 = [1.2 * driftRatio, 1.8 * driftRatio, 0.9 * driftRatio, 0.4 * driftRatio].map(v => Number(v.toFixed(3)));
+      const j2 = [0.3 * driftRatio, 0.4 * driftRatio, 0.2 * driftRatio, 0.1 * driftRatio].map(v => Number(v.toFixed(3)));
+      const j3 = [0.35 * driftRatio, 0.42 * driftRatio, 0.22 * driftRatio, 0.1 * driftRatio].map(v => Number(v.toFixed(3)));
+      const j4 = [0.15 * driftRatio, 0.2 * driftRatio, 0.1 * driftRatio, 0.05 * driftRatio].map(v => Number(v.toFixed(3)));
+
+      weightDriftChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: layers,
+          datasets: [
+            { label: 'Junction 1 (Heavy Skew)', data: j1, backgroundColor: '#e6ad4c', borderRadius: 2 },
+            { label: 'Junction 2 (Medium)', data: j2, backgroundColor: '#6e94bd', borderRadius: 2 },
+            { label: 'Junction 3 (Medium)', data: j3, backgroundColor: '#73ae93', borderRadius: 2 },
+            { label: 'Junction 4 (Light)', data: j4, backgroundColor: '#8b779f', borderRadius: 2 }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              labels: { color: '#5f7588', font: { size: 10 } }
+            },
+            tooltip: {
+              backgroundColor: '#ffffff',
+              borderColor: 'rgba(52, 77, 96, 0.20)',
+              borderWidth: 1,
+              titleColor: '#202b35',
+              bodyColor: '#52616d'
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(177, 183, 196, 0.12)' },
+              ticks: { color: '#5f7588', font: { size: 10 } }
+            },
+            y: {
+              grid: { color: 'rgba(177, 183, 196, 0.12)' },
+              ticks: { color: '#5f7588', font: { size: 10 } }
+            }
+          }
+        }
+      });
+    }
+
+    // --- BENCHMARKS TAB ---
+    function setBenchmarkSeed(seed) {
+      currentSeed = seed;
+      ['mean', '0', '1', '2'].forEach(s => {
+        const btn = document.getElementById(`seed-btn-${s}`);
+        if (btn) {
+          if (s === seed) {
+            btn.className = 'seed-filter-btn px-2.5 py-1 text-xs font-mono font-medium rounded-lg transition bg-indigo-600 text-white';
+          } else {
+            btn.className = 'seed-filter-btn px-2.5 py-1 text-xs font-mono font-medium rounded-lg transition text-slate-400 hover:text-slate-200';
+          }
+        }
+      });
+      renderBenchmarkTable();
+    }
+
+    function renderBenchmarkTable() {
+      const tbody = document.getElementById('benchmark-table-body');
+      if (!tbody) return;
+
+      if (currentSeed === 'mean') {
+        tbody.innerHTML = BENCHMARK_DATA.map(row => `
+          <tr class="hover:bg-slate-800/30 transition">
+            <td class="py-3.5 px-4 font-sans font-bold text-slate-200 flex items-center space-x-2">
+              <span class="w-2 h-2 rounded-full" style="background-color: ${row.color}"></span>
+              <span>${row.model}</span>
+            </td>
+            <td class="py-3.5 px-4 text-indigo-300 font-bold">${row.maeMean.toFixed(3)} ± ${row.maeStd.toFixed(3)}</td>
+            <td class="py-3.5 px-4 text-slate-300">${row.rmseMean.toFixed(3)} ± ${row.rmseStd.toFixed(3)}</td>
+            <td class="py-3.5 px-4">
+              <span class="px-2.5 py-1 rounded-full text-[10px] font-sans font-semibold bg-slate-800 text-slate-300 border border-slate-700">
+                ${row.badge}
+              </span>
+            </td>
+          </tr>
+        `).join('');
+      } else {
+        const list = SEED_BENCHMARKS[currentSeed] || [];
+        tbody.innerHTML = list.map(row => `
+          <tr class="hover:bg-slate-800/30 transition">
+            <td class="py-3.5 px-4 font-sans font-bold text-slate-200">${row.model}</td>
+            <td class="py-3.5 px-4 text-indigo-300 font-bold">${row.mae.toFixed(3)}</td>
+            <td class="py-3.5 px-4 text-slate-300">${row.rmse.toFixed(3)}</td>
+            <td class="py-3.5 px-4 text-slate-500 font-sans text-[11px]">Seed ${currentSeed} Execution</td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    function renderJunctionDriftCards() {
+      const container = document.getElementById('junction-drift-cards');
+      if (!container) return;
+
+      container.innerHTML = JUNCTION_METRICS.map(j => {
+        const isHigh = j.driftFactor.includes('High');
+        const badgeStyle = isHigh
+          ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+          : 'bg-slate-800 text-slate-400';
+        const nonIidColor = j.fedNonIIDMAE > 5 ? 'text-amber-400' : 'text-slate-200';
+
+        return `
+          <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-4 space-y-3">
+            <div class="flex justify-between items-start border-b border-slate-800/80 pb-2">
+              <div>
+                <h4 class="text-xs font-bold text-slate-200">${j.junction}</h4>
+                <span class="text-[10px] text-slate-500 font-mono">${j.volume}</span>
+              </div>
+              <span class="text-[10px] px-2 py-0.5 rounded font-semibold ${badgeStyle}">
+                ${j.driftFactor}
+              </span>
+            </div>
+
+            <div class="space-y-1.5 text-xs font-mono">
+              <div class="flex justify-between">
+                <span class="text-slate-400">Centralized MAE:</span>
+                <span class="text-emerald-400">${j.centralizedMAE}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-400">Fed IID MAE:</span>
+                <span class="text-indigo-400">${j.fedIIDMAE}</span>
+              </div>
+              <div class="flex justify-between border-t border-slate-800/60 pt-1 font-bold">
+                <span class="text-slate-300">Fed Non-IID MAE:</span>
+                <span class="${nonIidColor}">${j.fedNonIIDMAE}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function getExportPayload() {
+      return {
+        TEAM_CODE: 'FedTraffic (A3-PS003-TC008)',
+        team: 'Tech-4-Impact',
+        institution: 'KIT',
+        dataset: 'Kaggle Traffic (Nov 2015 - June 2017)',
+        splitDate: '2017-05-01',
+        evaluation: {
+          benchmarks: BENCHMARK_DATA,
+          perJunctionBreakdown: JUNCTION_METRICS,
+          seedsEvaluated: [0, 1, 2]
+        }
+      };
+    }
+
+    function renderJSONPreview() {
+      const el = document.getElementById('json-preview-block');
+      if (el) {
+        el.textContent = JSON.stringify(getExportPayload(), null, 2);
+      }
+    }
+
+    function copyJSONPayload() {
+      const str = JSON.stringify(getExportPayload(), null, 2);
+      navigator.clipboard.writeText(str).then(() => {
+        const textEl = document.getElementById('copy-json-text');
+        const iconEl = document.getElementById('copy-json-icon');
+        textEl.textContent = 'Copied to clipboard';
+        iconEl.setAttribute('data-lucide', 'check');
+        iconEl.classList.add('text-emerald-300');
+        lucide.createIcons();
+
+        setTimeout(() => {
+          textEl.textContent = 'Copy JSON Payload';
+          iconEl.setAttribute('data-lucide', 'copy');
+          iconEl.classList.remove('text-emerald-300');
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCloneCmd() {
+      const cmd = 'git clone https://github.com/aiori-hackathon/A3-PS003-TC008.git && cd FedTraffic && pip install -r requirements.txt';
+      navigator.clipboard.writeText(cmd).then(() => {
+        const textEl = document.getElementById('copy-cmd-text');
+        const iconEl = document.getElementById('copy-cmd-icon');
+        textEl.textContent = 'Copied';
+        iconEl.setAttribute('data-lucide', 'check');
+        iconEl.classList.add('text-emerald-400');
+        lucide.createIcons();
+
+        setTimeout(() => {
+          textEl.textContent = 'Copy';
+          iconEl.setAttribute('data-lucide', 'copy');
+          iconEl.classList.remove('text-emerald-400');
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    // --- INITIALIZATION ---
+    document.addEventListener('DOMContentLoaded', () => {
+      // Initialize view
+      switchTab('overview');
+      renderOverviewSteps();
+      updatePresetButtons();
+      selectJunction('j1');
+      selectModel('fedNonIid');
+      renderSliders();
+      renderSimulation();
+      handleRoundChange(15);
+      renderLossChart();
+      renderWeightDriftChart();
+      setBenchmarkSeed('mean');
+      renderJunctionDriftCards();
+      renderJSONPreview();
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>
