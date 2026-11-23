@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FedTraffic • Privacy-Preserving Traffic Forecasting</title>
+  <title>FedTraffic • Federated Traffic Forecasting Benchmark</title>
   
   <!-- Tailwind CSS via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -473,10 +473,10 @@
             <span>FedAvg Traffic Flow Intelligence Engine</span>
           </div>
           <h2 class="text-2xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight">
-            FedTraffic Flow Prediction with Lightweight GRUs (Privacy Preserved)
+            FedTraffic: federated traffic forecasting under heterogeneous data
           </h2>
           <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
-            FedTraffic enables decentralized junction nodes to collaboratively train a highly accurate next-hour traffic predictor without sharing sensitive, raw vehicular flow streams.
+            This project benchmarks centralized and federated GRU forecasting across four junctions, comparing accuracy, non-IID client drift and model-update communication cost.
           </p>
           <div class="pt-2 flex flex-wrap gap-3">
             <button
@@ -511,6 +511,38 @@
         </div>
       </div>
 
+      <section class="ft-finding-panel ft-panel bg-slate-900/70 border border-slate-800 rounded-2xl p-6 sm:p-8" aria-labelledby="ft-finding-title">
+        <div class="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-7"><div class="max-w-xl">
+          <div class="flex items-center gap-2 text-xs font-mono text-amber-400"><span class="w-2 h-2 rounded-full bg-amber-500" aria-hidden="true"></span><span>RECORDED BENCHMARK • MEAN ± SD ACROSS 3 SEEDS</span></div>
+          <h2 id="ft-finding-title" class="mt-3 text-2xl sm:text-3xl font-semibold text-white">Same communication budget. Different client-data behavior.</h2>
+          <p class="mt-3 text-sm text-slate-300 leading-relaxed">Across 30 rounds, both federated settings exchange 3,257,280 bytes. IID reaches 3.232 MAE; junction-level non-IID reaches 3.931 MAE. The centralized reference is 3.141 MAE; its pooled-data transfer is not included in this federated communication axis.</p>
+          <div class="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div class="border-l-2 border-emerald-600 pl-3"><div class="text-[11px] text-slate-400">Centralized reference</div><div class="mt-1 font-mono text-lg text-white">3.141 MAE</div></div>
+            <div class="border-l-2 border-sky-700 pl-3"><div class="text-[11px] text-slate-400">Federated IID</div><div class="mt-1 font-mono text-lg text-white">3.232 ± 0.004</div></div>
+            <div class="border-l-2 border-amber-600 pl-3"><div class="text-[11px] text-slate-400">Federated non-IID</div><div class="mt-1 font-mono text-lg text-white">3.931 ± 0.201</div></div>
+          </div>
+          <p class="mt-4 text-xs text-slate-400">The IID mean is 2.9% above centralized; non-IID is 25.2% above. Both federated settings have the same model-size-based communication cost.</p>
+        </div>
+        <figure class="w-full xl:max-w-xl rounded-xl border border-slate-700/70 bg-slate-950/40 p-4" aria-labelledby="ft-tradeoff-caption">
+          <figcaption id="ft-tradeoff-caption" class="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-300"><span class="font-medium">Test MAE vs. total federated payload</span><span class="text-[10px] font-mono text-slate-500">30 rounds • recorded results</span></figcaption>
+          <svg class="mt-3 w-full h-auto" viewBox="0 0 600 250" role="img" aria-labelledby="ft-tradeoff-title ft-tradeoff-desc">
+            <title id="ft-tradeoff-title">Federated test MAE at equal communication cost</title>
+            <desc id="ft-tradeoff-desc">Both IID and non-IID runs use 3.257 megabytes over 30 rounds. IID test MAE is 3.232 plus or minus 0.004. Non-IID test MAE is 3.931 plus or minus 0.201.</desc>
+            <g stroke="#385260" stroke-opacity=".38" stroke-width="1"><path d="M68 28H410M68 74H410M68 120H410M68 166H410"/><path d="M68 28V166M166 28V166M264 28V166M387 28V166"/></g>
+            <g fill="#94a9b1" font-family="monospace" font-size="11"><text x="31" y="170">3.0</text><text x="31" y="124">3.4</text><text x="31" y="78">3.8</text><text x="31" y="32">4.2</text><text x="65" y="185">0</text><text x="163" y="185">1</text><text x="261" y="185">2</text><text x="382" y="185" text-anchor="end">3.26</text><text x="239" y="213" text-anchor="middle">Total federated payload over 30 rounds (MB)</text><text transform="translate(13 100) rotate(-90)" text-anchor="middle">Test MAE (veh/hr)</text></g>
+            <g stroke-width="2"><path d="M387 36V82" stroke="#c7651b"/><path d="M381 36H393M381 82H393" stroke="#c7651b"/><circle cx="387" cy="59" r="6" fill="#c7651b" stroke="#fff"/><circle cx="387" cy="139" r="6" fill="#397b8d" stroke="#fff"/></g>
+            <g font-family="monospace" font-size="11" fill="#e8eff1"><text x="401" y="72">non-IID 3.931 ± 0.201</text><text x="401" y="143">IID 3.232 ± 0.004</text></g>
+          </svg>
+          <p class="text-[10px] leading-relaxed text-slate-500">Both points share the same x-position because payload is determined by model size, client count and rounds—not by the client split.</p>
+        </figure></div>
+        <div class="mt-5 grid grid-cols-2 lg:grid-cols-4 gap-3 border-t border-slate-700/70 pt-4 text-xs">
+          <div><span class="block text-slate-500">Dataset</span><span class="mt-1 block text-slate-200">Kaggle • 4 junctions • hourly</span></div>
+          <div><span class="block text-slate-500">Chronological test</span><span class="mt-1 block text-slate-200">May–June 2017</span></div>
+          <div><span class="block text-slate-500">Model</span><span class="mt-1 block text-slate-200">GRU • 3,393 parameters</span></div>
+          <div><span class="block text-slate-500">Seeds</span><span class="mt-1 block text-slate-200">0, 1 and 2 • mean ± SD</span></div>
+        </div>
+        <div class="mt-6 flex flex-wrap gap-3"><button type="button" onclick="downloadBenchmarkResults()" class="px-4 py-2.5 border border-slate-600 hover:bg-slate-800 text-slate-200 rounded-lg text-sm">Download recorded results JSON</button><button type="button" onclick="openJuryDemoStep('forecast')" class="px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-lg text-sm font-semibold">Start the 3-minute jury walkthrough</button><button type="button" onclick="openJuryDemoStep('benchmark')" class="px-4 py-2.5 border border-slate-600 hover:bg-slate-800 text-slate-200 rounded-lg text-sm">Open full benchmark table</button></div>
+      </section>
       <!-- Top Key Metrics -->
       <div class="ft-stat-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="bg-slate-900/60 border border-indigo-500/20 p-5 rounded-2xl shadow-lg backdrop-blur-sm relative overflow-hidden group hover:border-slate-700 transition">
@@ -536,21 +568,30 @@
             <span class="text-xs font-medium text-slate-400">Comm Cost per Round</span>
             <i data-lucide="zap" class="w-5 h-5 text-amber-400"></i>
           </div>
-          <div class="text-2xl font-bold text-slate-100">108.5 KB</div>
+          <div class="text-2xl font-bold text-slate-100">108,576 B</div>
           <div class="text-[11px] text-slate-500 mt-1">Ultra-low Network Footprint</div>
         </div>
 
         <div class="bg-slate-900/60 border border-emerald-500/20 p-5 rounded-2xl shadow-lg backdrop-blur-sm relative overflow-hidden group hover:border-slate-700 transition">
           <div class="flex items-center justify-between mb-2">
-            <span class="text-xs font-medium text-slate-400">Naive Baseline Boost</span>
+            <span class="text-xs font-medium text-slate-400">Centralized MAE reduction vs persistence</span>
             <i data-lucide="trending-up" class="w-5 h-5 text-emerald-400"></i>
           </div>
-          <div class="text-2xl font-bold text-slate-100">+21% Accuracy</div>
+          <div class="text-2xl font-bold text-slate-100">26.1% MAE</div>
           <div class="text-[11px] text-slate-500 mt-1">vs Persistence Model</div>
         </div>
       </div>
 
-      <!-- Architecture Flow Diagram -->
+      <section id="ft-jury-route" class="ft-panel bg-slate-900/60 border border-slate-800 rounded-2xl p-6" aria-labelledby="ft-jury-title">
+        <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-5"><div><p class="text-xs font-mono text-sky-400">DEMO ROUTE • ABOUT 3 MINUTES</p><h2 id="ft-jury-title" class="mt-1 text-xl font-semibold text-white">A guided path through the evidence</h2></div><p class="max-w-xl text-xs text-slate-400">The forecast and FedAvg panels are interactive visualizations. The benchmark figures are recorded from the three-seed experiment.</p></div>
+        <ol class="ft-jury-grid grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-3">
+          <li><button type="button" onclick="openJuryDemoStep('forecast')" class="ft-jury-step w-full h-full text-left p-4 rounded-lg border border-slate-700 bg-slate-950/40 hover:border-amber-500/60"><span class="font-mono text-xs text-amber-400">01 / FORECAST</span><strong class="mt-2 block text-sm text-white">Choose a junction and model</strong><span class="mt-2 block text-xs leading-relaxed text-slate-400">Inspect the 12-hour input and next-hour scenario forecast.</span></button></li>
+          <li><button type="button" onclick="openJuryDemoStep('fedavg')" class="ft-jury-step w-full h-full text-left p-4 rounded-lg border border-slate-700 bg-slate-950/40 hover:border-amber-500/60"><span class="font-mono text-xs text-amber-400">02 / FEDAVG</span><strong class="mt-2 block text-sm text-white">Step through a round</strong><span class="mt-2 block text-xs leading-relaxed text-slate-400">Follow the visualized convergence and client-weight drift.</span></button></li>
+          <li><button type="button" onclick="openJuryDemoStep('benchmark')" class="ft-jury-step w-full h-full text-left p-4 rounded-lg border border-slate-700 bg-slate-950/40 hover:border-amber-500/60"><span class="font-mono text-xs text-amber-400">03 / RESULTS</span><strong class="mt-2 block text-sm text-white">Compare recorded runs</strong><span class="mt-2 block text-xs leading-relaxed text-slate-400">Review the three-seed means and standard deviations.</span></button></li>
+          <li><button type="button" onclick="openJuryDemoStep('drift')" class="ft-jury-step w-full h-full text-left p-4 rounded-lg border border-slate-700 bg-slate-950/40 hover:border-amber-500/60"><span class="font-mono text-xs text-amber-400">04 / CLIENT DRIFT</span><strong class="mt-2 block text-sm text-white">Find the non-IID impact</strong><span class="mt-2 block text-xs leading-relaxed text-slate-400">Trace the aggregate error increase to Junction 1.</span></button></li>
+          <li><button type="button" onclick="openJuryDemoStep('evidence')" class="ft-jury-step w-full h-full text-left p-4 rounded-lg border border-slate-700 bg-slate-950/40 hover:border-amber-500/60"><span class="font-mono text-xs text-amber-400">05 / METHOD</span><strong class="mt-2 block text-sm text-white">Verify scope and limits</strong><span class="mt-2 block text-xs leading-relaxed text-slate-400">Check the data split, model setup and privacy boundaries.</span></button></li>
+        </ol>
+      </section>      <!-- Architecture Flow Diagram -->
       <div class="ft-pipeline-panel bg-slate-900/70 border border-slate-800 rounded-2xl p-6 shadow-xl">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
           <div>
@@ -576,7 +617,7 @@
             <span class="text-xs font-mono text-indigo-400 uppercase tracking-wider">Detailed Specification</span>
             <h4 id="active-step-title" class="text-sm font-semibold text-white">1. Local Preprocessing — 12-Hour Sliding Window</h4>
             <p id="active-step-desc" class="text-xs text-slate-300 leading-relaxed">
-              Each physical junction collects continuous sensor counts. Sequences are formatted into 12-hour historical sliding temporal windows locally without external broadcast.
+              Hourly junction counts are formatted into 12-hour historical windows; the experiment uses a chronological train/test split.
             </p>
           </div>
           <div class="shrink-0 bg-slate-900 border border-slate-800 px-4 py-2.5 rounded-lg text-right">
@@ -595,12 +636,12 @@
                 <i data-lucide="lock" class="w-5 h-5 text-slate-200"></i>
               </div>
               <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">
-                GDPR / Privacy Compliant
+                Federated simulation
               </span>
             </div>
-            <h3 class="text-base font-bold text-white mb-2">100% Privacy Preservation</h3>
+            <h3 class="text-base font-bold text-white mb-2">Raw data stays local in this experiment</h3>
             <p class="text-xs text-slate-400 leading-relaxed">
-              Raw traffic count data never leaves the local junction node. Only abstracted encrypted gradient weight updates are communicated.
+              The federated setup keeps raw traffic data local and exchanges model weights. This prototype does not implement differential privacy or secure aggregation, so it makes no formal privacy guarantee.
             </p>
           </div>
         </div>
@@ -615,9 +656,9 @@
                 Heterogeneity Aware
               </span>
             </div>
-            <h3 class="text-base font-bold text-white mb-2">Non-IID Drift Resiliency</h3>
+            <h3 class="text-base font-bold text-white mb-2">Non-IID Drift Analysis</h3>
             <p class="text-xs text-slate-400 leading-relaxed">
-              Designed specifically to mitigate local statistical distribution skew between heavy highway axes and quiet residential side-lanes.
+              Measures how different junction-level data distributions affect global model error; no drift-correction algorithm is implemented.
             </p>
           </div>
         </div>
@@ -629,12 +670,12 @@
                 <i data-lucide="zap" class="w-5 h-5 text-slate-200"></i>
               </div>
               <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">
-                Edge IoT Optimized
+                Analytical payload baseline
               </span>
             </div>
             <h3 class="text-base font-bold text-white mb-2">Minimal Bandwidth Footprint</h3>
             <p class="text-xs text-slate-400 leading-relaxed">
-              Consuming just ~108 KB per communication round, FedTraffic operates seamlessly over low-bandwidth cellular/IoT edge hardware.
+              The estimated model payload is 108,576 bytes per round. This is calculated from parameter size and client count; network and protocol overhead are not measured.
             </p>
           </div>
         </div>
@@ -651,9 +692,9 @@
           <div>
             <h2 class="text-lg font-bold text-white flex items-center space-x-2">
               <i data-lucide="cpu" class="w-5 h-5 text-indigo-400"></i>
-              <span>GRU Traffic Inference Simulator</span>
+              <span>Interactive Scenario Forecast</span>
             </h2>
-            <p class="text-xs text-slate-400">12-Hour Sliding Window Input → 1-Hour Horizon Prediction</p>
+            <p class="text-xs text-slate-400">Preset-based 12-hour input → next-hour illustration; not live trained-model inference</p>
           </div>
 
           <!-- Preset Buttons -->
@@ -742,7 +783,7 @@
               </div>
               <div class="mt-2 text-[11px] text-emerald-400 flex items-center space-x-1">
                 <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
-                <span>Active GRU Output</span>
+                <span>Illustrative scenario estimate</span>
               </div>
             </div>
 
@@ -814,7 +855,7 @@
             <div class="h-8 w-px bg-slate-800"></div>
             <div class="text-right">
               <span class="text-[10px] text-slate-500 uppercase block font-mono">Payload / Round</span>
-              <span class="text-sm font-bold font-mono text-indigo-400">108.5 KB</span>
+              <span class="text-sm font-bold font-mono text-indigo-400">108,576 B</span>
             </div>
           </div>
         </div>
@@ -851,7 +892,7 @@
           <div class="flex items-center justify-between">
             <div>
               <h3 class="text-sm font-bold text-white">Loss Convergence Dynamics</h3>
-              <p class="text-[11px] text-slate-400">Training Loss over 30 Federated Communication Rounds</p>
+              <p class="text-[11px] text-slate-400">Illustrative trajectory based on the selected round; recorded benchmark results are shown in Results</p>
             </div>
           </div>
 
@@ -865,7 +906,7 @@
           <div class="flex items-center justify-between">
             <div>
               <h3 class="text-sm font-bold text-white">Client Weight Drift Vector (|Δw|)</h3>
-              <p class="text-[11px] text-slate-400">Magnitude of gradient updates per junction node</p>
+              <p class="text-[11px] text-slate-400">Illustrative client-weight drift across the selected round</p>
             </div>
           </div>
 
@@ -881,14 +922,14 @@
     <!-- ========================================== -->
     <div id="tab-benchmarks" class="ft-tab space-y-6 hidden animate-fadeIn">
       <!-- Benchmark Metric Cards -->
-      <div class="ft-benchmark-panel bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+      <div id="benchmark-results" class="ft-benchmark-panel bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
           <div>
             <h2 class="text-lg font-bold text-white flex items-center space-x-2">
               <i data-lucide="bar-chart-3" class="w-5 h-5 text-indigo-400"></i>
               <span>Experimental Benchmarks across 3 Random Seeds</span>
             </h2>
-            <p class="text-xs text-slate-400">Statistical evaluation comparing Centralized vs Federated Paradigms</p>
+            <p class="text-xs text-slate-400">Recorded three-seed test results comparing centralized and federated paradigms</p>
           </div>
 
           <div class="flex items-center space-x-2">
@@ -920,8 +961,13 @@
         </div>
       </div>
 
+      <div class="px-1 text-sm text-slate-300">
+        Federated non-IID mean MAE is 3.931; the junction breakdown shows where that error concentrates.
+        <button type="button" onclick="document.getElementById('benchmark-junction-drift').scrollIntoView({behavior:'smooth',block:'start'})" class="ml-1 text-amber-400 underline underline-offset-2 hover:text-amber-300">Inspect per-junction drift</button>
+      </div>
+
       <!-- Per-Junction Non-IID Drift Breakdown -->
-      <div class="ft-junction-panel bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+      <div id="benchmark-junction-drift" class="ft-junction-panel bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
         <div>
           <h3 class="text-base font-bold text-white flex items-center space-x-2">
             <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-400"></i>
@@ -943,8 +989,9 @@
               <i data-lucide="terminal" class="w-4 h-4 text-indigo-400"></i>
               <span>Exportable Benchmark Payload (JSON Format)</span>
             </h3>
-            <p class="text-xs text-slate-400">Structured telemetry ready for paper reproduction and validation</p>
+            <p class="text-xs text-slate-400">Recorded benchmark results and experiment metadata; interactive tabs do not execute training runs.</p>
           </div>
+          <button type="button" onclick="downloadBenchmarkResults()" class="px-3 py-1.5 border border-slate-600 hover:bg-slate-800 text-slate-100 rounded-lg text-xs font-semibold">Download JSON</button>
           <button
             onclick="copyJSONPayload()"
             id="copy-json-btn"
@@ -963,6 +1010,27 @@
     <!-- TAB 5: TECHNICAL SPECS & DOCS              -->
     <!-- ========================================== -->
     <div id="tab-docs" class="ft-tab space-y-6 hidden animate-fadeIn">
+      <section id="ft-methods-evidence" class="ft-doc-panel ft-panel bg-slate-900/70 border border-slate-800 rounded-2xl p-6 sm:p-7 space-y-5 scroll-mt-24" aria-labelledby="ft-methods-title">
+        <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4"><div><p class="text-xs font-mono text-sky-400">EXPERIMENT RECORD</p><h2 id="ft-methods-title" class="mt-1 text-xl font-semibold text-white">Methods, evidence and limits</h2><p class="mt-2 text-sm text-slate-300">These are recorded experiment settings. The controls elsewhere are interactive visualizations, not a live training backend.</p></div><button type="button" onclick="downloadBenchmarkResults()" class="shrink-0 px-3.5 py-2 border border-slate-600 hover:bg-slate-800 text-slate-100 rounded-lg text-xs font-semibold">Download results JSON</button></div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="rounded-lg border border-slate-700/70 bg-slate-950/35 p-4"><h3 class="text-sm font-semibold text-white">Recorded setup</h3><dl class="mt-3 grid grid-cols-[minmax(120px,.8fr)_1.2fr] gap-x-4 gap-y-2 text-xs">
+            <dt class="text-slate-400">Dataset</dt><dd class="text-slate-200"><a class="underline decoration-slate-500 underline-offset-2 hover:text-sky-300" href="https://www.kaggle.com/datasets/fedesoriano/traffic-prediction-dataset" target="_blank" rel="noopener noreferrer">Public Kaggle traffic dataset</a>, four junctions, hourly counts</dd>
+            <dt class="text-slate-400">Temporal split</dt><dd class="text-slate-200">Train before 1 May 2017; test May–June 2017</dd>
+            <dt class="text-slate-400">Test size</dt><dd class="text-slate-200">1,464 hourly observations per junction</dd>
+            <dt class="text-slate-400">Forecast task</dt><dd class="text-slate-200">12-hour input window → next-hour count</dd>
+            <dt class="text-slate-400">Model</dt><dd class="text-slate-200">GRU, 32 hidden units, 3,393 parameters</dd>
+            <dt class="text-slate-400">Federated protocol</dt><dd class="text-slate-200">Four clients, one local epoch, 30 rounds</dd>
+            <dt class="text-slate-400">Repetitions</dt><dd class="text-slate-200">Seeds 0, 1 and 2; report mean ± SD</dd>
+            <dt class="text-slate-400">Payload estimate</dt><dd class="text-slate-200">108,576 bytes per round; 3,257,280 bytes over 30 rounds</dd>
+          </dl></div>
+          <div class="rounded-lg border border-amber-700/40 bg-amber-950/10 p-4"><h3 class="text-sm font-semibold text-white">What this prototype does—and does not—show</h3><ul class="mt-3 space-y-2 text-xs leading-relaxed text-slate-300">
+            <li><strong class="text-amber-300">Simulation:</strong> all clients run in one process; there is no physical distributed deployment, live camera feed or network measurement.</li>
+            <li><strong class="text-amber-300">Communication:</strong> payload bytes are calculated from float32 model size, four clients and upload/download directions. Protocol headers and network overhead are excluded.</li>
+            <li><strong class="text-amber-300">Privacy:</strong> raw data is kept local in the federated experiment, but this prototype does not implement differential privacy or secure aggregation and makes no formal privacy guarantee.</li>
+            <li><strong class="text-amber-300">Scope:</strong> results cover one public dataset and four junctions; they are not a city deployment claim.</li>
+          </ul></div>
+        </div>
+      </section>
       <!-- System Hardware & Software Specs -->
       <div class="ft-doc-grid grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Software & Dataset Stack -->
@@ -975,7 +1043,7 @@
           <div class="space-y-3 text-xs">
             <div class="p-3 bg-slate-950 rounded-xl border border-slate-800/80 flex items-center justify-between">
               <span class="text-slate-400">Deep Learning Framework</span>
-              <span class="font-mono font-bold text-indigo-300">PyTorch 2.1.0 (CUDA 11.8)</span>
+              <span class="font-mono font-bold text-indigo-300">PyTorch (training stack)</span>
             </div>
             <div class="p-3 bg-slate-950 rounded-xl border border-slate-800/80 flex items-center justify-between">
               <span class="text-slate-400">Hardware Platform</span>
@@ -1038,7 +1106,7 @@
         </div>
 
         <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 font-mono text-xs text-emerald-400 overflow-x-auto">
-          $ git clone https://github.com/Tech-4-Impact/FedTraffic.git &amp;&amp; cd FedTraffic &amp;&amp; pip install -r requirements.txt
+          $ git clone https://github.com/aiori-hackathon/A3-PS003-TC008.git &amp;&amp; cd A3-PS003-TC008 &amp;&amp; pip install torch pandas numpy scikit-learn matplotlib
         </div>
       </div>
 
@@ -1095,7 +1163,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
       <div class="flex items-center space-x-2">
         <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
-        <span>FedTraffic Federated Learning Protocol • Zero-Raw Data Transmission</span>
+        <span>FedTraffic • recorded federated benchmark and interactive visualizations</span>
       </div>
       <div class="flex items-center space-x-4">
         <span>Project ID: <strong class="text-slate-200">A3-PS003-TC008</strong></span>
@@ -1112,7 +1180,7 @@
     const BENCHMARK_DATA = [
       { model: 'Centralized Baseline', maeMean: 3.141, maeStd: 0.026, rmseMean: 4.927, rmseStd: 0.047, badge: 'Upper Bound', color: '#10b981' },
       { model: 'Federated IID', maeMean: 3.232, maeStd: 0.004, rmseMean: 5.109, rmseStd: 0.012, badge: 'Near-Optimal', color: '#3b82f6' },
-      { model: 'Federated Non-IID', maeMean: 3.931, maeStd: 0.201, rmseMean: 6.354, rmseStd: 0.348, badge: 'Realistic Privacy', color: '#f59e0b' },
+      { model: 'Federated Non-IID', maeMean: 3.931, maeStd: 0.201, rmseMean: 6.354, rmseStd: 0.348, badge: 'Non-IID Split', color: '#f59e0b' },
       { model: 'Naive Persistence', maeMean: 4.250, maeStd: 0.110, rmseMean: 6.810, rmseStd: 0.220, badge: 'Baseline', color: '#ef4444' }
     ];
 
@@ -1162,21 +1230,21 @@
       {
         title: '1. Local Preprocessing',
         sub: '12-Hour Sliding Window',
-        desc: 'Each physical junction collects continuous sensor counts. Sequences are formatted into 12-hour historical sliding temporal windows locally without external broadcast.',
+        desc: 'Hourly junction counts are formatted into 12-hour historical windows; the experiment uses a chronological train/test split.',
         metric: '48,120 Total Data Hours',
         icon: 'hard-drive'
       },
       {
         title: '2. Local GRU Training',
         sub: '32 Hidden Unit Architecture',
-        desc: 'A lightweight Gated Recurrent Unit (GRU) neural network executes local batch SGD updates directly on junction node hardware (CUDA/CPU).',
+        desc: 'The recorded experiment trains a compact GRU for one local epoch on each simulated client partition; this page only visualizes the process.',
         metric: '3,393 Parameters Total',
         icon: 'cpu'
       },
       {
-        title: '3. Encrypted Upload',
-        sub: 'Zero Raw-Data Sharing',
-        desc: 'Local model weight parameters (theta) are encrypted and dispatched to the central orchestrator via compressed payloads.',
+        title: '3. Model-Weight Exchange',
+        sub: 'Raw Traffic Values Stay Local',
+        desc: 'Each client sends its updated model weights to the central aggregator. This simulator does not add encryption or compression.',
         metric: '13,572 Bytes Payload / Client',
         icon: 'lock'
       },
@@ -1184,14 +1252,14 @@
         title: '4. FedAvg Aggregation',
         sub: 'Parameter Averaging',
         desc: 'Central orchestrator computes federated average: w_{t+1} = sum (n_k / N) * w_{t+1}^k across all active edge nodes.',
-        metric: '108.5 KB Comm / Round',
+        metric: '108,576 B Comm / Round',
         icon: 'refresh-cw'
       },
       {
         title: '5. Model Broadcast',
         sub: 'Global Synchronized Update',
         desc: 'Updated global model weights are redistributed to junctions, completing one communication iteration while resilience against drift is enhanced.',
-        metric: '+21% Accuracy over Naive',
+        metric: '26.1% MAE over Naive',
         icon: 'globe'
       }
     ];
@@ -1212,6 +1280,31 @@
     let weightDriftChartInstance = null;
 
     // --- TAB SWITCHING ---
+    function openJuryDemoStep(stepKey) {
+      const routes = {
+        forecast: { tab: 'simulation', target: 'tab-simulation' },
+        fedavg: { tab: 'fedavg', target: 'tab-fedavg' },
+        benchmark: { tab: 'benchmarks', target: 'benchmark-results' },
+        drift: { tab: 'benchmarks', target: 'benchmark-junction-drift' },
+        evidence: { tab: 'docs', target: 'ft-methods-evidence' }
+      };
+      const route = routes[stepKey];
+      if (!route) return;
+      switchTab(route.tab);
+      window.setTimeout(() => {
+        if (stepKey === 'forecast') {
+          applyPreset('morningRush');
+          selectJunction('j1');
+          selectModel('fedNonIid');
+        } else if (stepKey === 'fedavg') {
+          handleRoundChange(15);
+        } else if (stepKey === 'benchmark' || stepKey === 'drift') {
+          setBenchmarkSeed('mean');
+        }
+        const target = document.getElementById(route.target);
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 120);
+    }
     function switchTab(tabId) {
       currentTab = tabId;
       const tabs = ['overview', 'simulation', 'fedavg', 'benchmarks', 'docs'];
@@ -1793,19 +1886,39 @@
 
     function getExportPayload() {
       return {
-        TEAM_CODE: 'FedTraffic (A3-PS003-TC008)',
+        project: 'FedTraffic (A3-PS003-TC008)',
         team: 'Tech-4-Impact',
         institution: 'KIT',
-        dataset: 'Kaggle Traffic (Nov 2015 - June 2017)',
-        splitDate: '2017-05-01',
+        experiment: {
+          dataset: 'Public Kaggle traffic prediction dataset; four junctions, hourly counts',
+          datasetUrl: 'https://www.kaggle.com/datasets/fedesoriano/traffic-prediction-dataset',
+          trainPeriod: 'Before 2017-05-01',
+          testPeriod: '2017-05 through 2017-06',
+          testObservationsPerJunction: 1464,
+          inputWindowHours: 12,
+          forecastHorizonHours: 1,
+          model: 'GRU, 32 hidden units, 3393 parameters',
+          clients: 4,
+          localEpochsPerRound: 1,
+          rounds: 30,
+          communicationBytesPerRound: 108576,
+          communicationBytesTotal: 3257280,
+          communicationCostIsAnalytical: true,
+          seedsEvaluated: [0, 1, 2]
+        },
         evaluation: {
           benchmarks: BENCHMARK_DATA,
           perJunctionBreakdown: JUNCTION_METRICS,
-          seedsEvaluated: [0, 1, 2]
-        }
+          seedResults: SEED_BENCHMARKS
+        },
+        limitations: [
+          'Clients run in one process; no physical distributed deployment or on-wire measurement.',
+          'Communication estimate excludes protocol and network overhead.',
+          'No differential privacy or secure aggregation; no formal privacy guarantee.',
+          'Results use one public dataset and four junctions.'
+        ]
       };
     }
-
     function renderJSONPreview() {
       const el = document.getElementById('json-preview-block');
       if (el) {
@@ -1813,6 +1926,18 @@
       }
     }
 
+    function downloadBenchmarkResults() {
+      const json = JSON.stringify(getExportPayload(), null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'fedtraffic-benchmark-results.json';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
     function copyJSONPayload() {
       const str = JSON.stringify(getExportPayload(), null, 2);
       navigator.clipboard.writeText(str).then(() => {
@@ -1833,7 +1958,7 @@
     }
 
     function copyCloneCmd() {
-      const cmd = 'git clone https://github.com/aiori-hackathon/A3-PS003-TC008.git && cd FedTraffic && pip install -r requirements.txt';
+      const cmd = 'git clone https://github.com/aiori-hackathon/A3-PS003-TC008.git && cd A3-PS003-TC008 && pip install torch pandas numpy scikit-learn matplotlib';
       navigator.clipboard.writeText(cmd).then(() => {
         const textEl = document.getElementById('copy-cmd-text');
         const iconEl = document.getElementById('copy-cmd-icon');
